@@ -1,0 +1,523 @@
+<!DOCTYPE html><html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>オリジナル パズルRPG</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: linear-gradient(180deg, #15152a, #080812);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.game {
+  width: min(100vw, 430px);
+  min-height: 100vh;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.top-panel {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.enemy-area {
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.enemy {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #ff5b9f 18%, #7d2cff 55%, #24104d 100%);
+  box-shadow: 0 0 22px rgba(255, 91, 159, 0.65);
+  position: relative;
+  transition: transform 0.12s;
+}
+
+.enemy.hit {
+  transform: scale(0.9) rotate(-6deg);
+  filter: brightness(1.6);
+}
+
+.enemy::before, .enemy::after {
+  content: "";
+  position: absolute;
+  top: 28px;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.enemy::before { left: 25px; }
+.enemy::after { right: 25px; }
+
+.enemy-name {
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.hp-bar-wrap {
+  width: 100%;
+  height: 18px;
+  background: rgba(0,0,0,0.35);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.hp-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #21e66b, #d5ff46);
+  border-radius: 999px;
+  transition: width 0.35s ease;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  margin-top: 8px;
+  color: #e9e9ff;
+}
+
+.message {
+  min-height: 42px;
+  background: rgba(0,0,0,0.28);
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-weight: 700;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff4b8;
+}
+
+.board-wrap {
+  width: 100%;
+  aspect-ratio: 6 / 5;
+  background: rgba(255,255,255,0.1);
+  padding: 6px;
+  border-radius: 18px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12), 0 10px 25px rgba(0,0,0,0.4);
+  touch-action: none;
+}
+
+.board {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: 5px;
+  position: relative;
+}
+
+.orb {
+  border-radius: 50%;
+  box-shadow: inset -5px -7px 10px rgba(0,0,0,0.28), inset 4px 4px 8px rgba(255,255,255,0.55), 0 4px 8px rgba(0,0,0,0.3);
+  transition: transform 0.08s, opacity 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 900;
+  position: relative;
+}
+
+.orb.selected {
+  transform: scale(1.15);
+  outline: 3px solid #fff;
+  z-index: 5;
+}
+
+.orb.clear {
+  opacity: 0;
+  transform: scale(0.2);
+}
+
+.fire { background: radial-gradient(circle at 35% 30%, #fff6b0, #ff5548 35%, #bd1010 100%); }
+.water { background: radial-gradient(circle at 35% 30%, #c8f6ff, #3ba3ff 35%, #0756b5 100%); }
+.wood { background: radial-gradient(circle at 35% 30%, #e5ffd4, #47d85e 35%, #168331 100%); }
+.light { background: radial-gradient(circle at 35% 30%, #ffffff, #ffe660 38%, #d79c00 100%); }
+.dark { background: radial-gradient(circle at 35% 30%, #ffccff, #9b5cff 38%, #3a126e 100%); }
+.heart { background: radial-gradient(circle at 35% 30%, #ffffff, #ff7dcc 40%, #c91d73 100%); }
+
+.controls {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  flex: 1;
+  border: 0;
+  border-radius: 15px;
+  padding: 13px 10px;
+  font-size: 16px;
+  font-weight: 900;
+  color: #171727;
+  background: linear-gradient(180deg, #fff, #cfd4ff);
+  box-shadow: 0 6px 0 #7f86c7, 0 10px 18px rgba(0,0,0,0.3);
+}
+
+button:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #7f86c7, 0 5px 12px rgba(0,0,0,0.3);
+}
+
+.hint {
+  font-size: 12px;
+  opacity: 0.72;
+  text-align: center;
+  line-height: 1.4;
+}
+
+  </style>
+</head>
+<body>
+  <main class="game">
+    <section class="top-panel">
+      <div class="enemy-area">
+        <div id="enemy" class="enemy"></div>
+        <div class="enemy-name">まじっくスライム</div>
+      </div>
+      <div class="hp-bar-wrap">
+        <div id="enemyHpBar" class="hp-bar"></div>
+      </div>
+      <div class="info-row">
+        <span>敵HP：<b id="enemyHpText">3000</b></span>
+        <span>最大コンボ：<b id="bestComboText">0</b></span>
+      </div>
+    </section><div id="message" class="message">ドロップを長押しして動かそう！</div>
+
+<section class="board-wrap" id="boardWrap">
+  <div id="board" class="board"></div>
+</section>
+
+<div class="controls">
+  <button id="resetBtn">リセット</button>
+  <button id="healBtn">敵を復活</button>
+</div>
+
+<div class="hint">※オリジナル素材のパズルRPGです。3つ以上つなげると攻撃、ハートは回復扱い。</div>
+
+  </main>  <script>
+    const ROWS = 5;
+    const COLS = 6;
+    const ORB_TYPES = ["fire", "water", "wood", "light", "dark", "heart"];
+    const ORB_SYMBOLS = {
+      fire: "火",
+      water: "水",
+      wood: "木",
+      light: "光",
+      dark: "闇",
+      heart: "♡"
+    };
+
+    const boardEl = document.getElementById("board");
+    const boardWrap = document.getElementById("boardWrap");
+    const messageEl = document.getElementById("message");
+    const enemyEl = document.getElementById("enemy");
+    const enemyHpBar = document.getElementById("enemyHpBar");
+    const enemyHpText = document.getElementById("enemyHpText");
+    const bestComboText = document.getElementById("bestComboText");
+    const resetBtn = document.getElementById("resetBtn");
+    const healBtn = document.getElementById("healBtn");
+
+    let board = [];
+    let selected = null;
+    let isDragging = false;
+    let enemyMaxHp = 3000;
+    let enemyHp = enemyMaxHp;
+    let bestCombo = 0;
+    let locked = false;
+
+    function randomOrb() {
+      return ORB_TYPES[Math.floor(Math.random() * ORB_TYPES.length)];
+    }
+
+    function createBoard() {
+      board = [];
+      for (let r = 0; r < ROWS; r++) {
+        const row = [];
+        for (let c = 0; c < COLS; c++) {
+          row.push(randomOrb());
+        }
+        board.push(row);
+      }
+
+      // 初期盤面で勝手に消えすぎないよう軽く調整
+      while (findMatches().length > 0) {
+        for (const match of findMatches()) {
+          board[match.r][match.c] = randomOrb();
+        }
+      }
+      renderBoard();
+    }
+
+    function renderBoard() {
+      boardEl.innerHTML = "";
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const orb = document.createElement("div");
+          const type = board[r][c];
+          orb.className = `orb ${type}`;
+          orb.textContent = ORB_SYMBOLS[type];
+          orb.dataset.r = r;
+          orb.dataset.c = c;
+          if (selected && selected.r === r && selected.c === c) {
+            orb.classList.add("selected");
+          }
+          boardEl.appendChild(orb);
+        }
+      }
+    }
+
+    function pointerToCell(clientX, clientY) {
+      const rect = boardEl.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      if (x < 0 || y < 0 || x > rect.width || y > rect.height) return null;
+      const c = Math.min(COLS - 1, Math.floor(x / (rect.width / COLS)));
+      const r = Math.min(ROWS - 1, Math.floor(y / (rect.height / ROWS)));
+      return { r, c };
+    }
+
+    function swapCells(a, b) {
+      const temp = board[a.r][a.c];
+      board[a.r][a.c] = board[b.r][b.c];
+      board[b.r][b.c] = temp;
+    }
+
+    function isNeighbor(a, b) {
+      return Math.abs(a.r - b.r) + Math.abs(a.c - b.c) === 1;
+    }
+
+    function startDrag(e) {
+      if (locked) return;
+      const point = e.touches ? e.touches[0] : e;
+      const cell = pointerToCell(point.clientX, point.clientY);
+      if (!cell) return;
+      selected = cell;
+      isDragging = true;
+      messageEl.textContent = "そのまま指で動かしてね";
+      renderBoard();
+      e.preventDefault();
+    }
+
+    function moveDrag(e) {
+      if (!isDragging || locked) return;
+      const point = e.touches ? e.touches[0] : e;
+      const cell = pointerToCell(point.clientX, point.clientY);
+      if (!cell || !selected) return;
+      if (isNeighbor(selected, cell)) {
+        swapCells(selected, cell);
+        selected = cell;
+        renderBoard();
+      }
+      e.preventDefault();
+    }
+
+    async function endDrag() {
+      if (!isDragging || locked) return;
+      isDragging = false;
+      selected = null;
+      renderBoard();
+      await resolveBoard();
+    }
+
+    function findMatches() {
+      const matched = new Set();
+
+      // 横判定
+      for (let r = 0; r < ROWS; r++) {
+        let count = 1;
+        for (let c = 1; c <= COLS; c++) {
+          if (c < COLS && board[r][c] === board[r][c - 1]) {
+            count++;
+          } else {
+            if (count >= 3) {
+              for (let k = 0; k < count; k++) {
+                matched.add(`${r},${c - 1 - k}`);
+              }
+            }
+            count = 1;
+          }
+        }
+      }
+
+      // 縦判定
+      for (let c = 0; c < COLS; c++) {
+        let count = 1;
+        for (let r = 1; r <= ROWS; r++) {
+          if (r < ROWS && board[r][c] === board[r - 1][c]) {
+            count++;
+          } else {
+            if (count >= 3) {
+              for (let k = 0; k < count; k++) {
+                matched.add(`${r - 1 - k},${c}`);
+              }
+            }
+            count = 1;
+          }
+        }
+      }
+
+      return [...matched].map(item => {
+        const [r, c] = item.split(",").map(Number);
+        return { r, c, type: board[r][c] };
+      });
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function clearMatches(matches) {
+      const allOrbs = [...boardEl.children];
+      for (const match of matches) {
+        const index = match.r * COLS + match.c;
+        allOrbs[index].classList.add("clear");
+        board[match.r][match.c] = null;
+      }
+    }
+
+    function dropOrbs() {
+      for (let c = 0; c < COLS; c++) {
+        const column = [];
+        for (let r = ROWS - 1; r >= 0; r--) {
+          if (board[r][c]) column.push(board[r][c]);
+        }
+        while (column.length < ROWS) {
+          column.push(randomOrb());
+        }
+        for (let r = ROWS - 1; r >= 0; r--) {
+          board[r][c] = column[ROWS - 1 - r];
+        }
+      }
+    }
+
+    function countTypes(matches) {
+      const counts = {};
+      for (const match of matches) {
+        counts[match.type] = (counts[match.type] || 0) + 1;
+      }
+      return counts;
+    }
+
+    function attack(matches, combo) {
+      const counts = countTypes(matches);
+      let damage = 0;
+
+      for (const [type, amount] of Object.entries(counts)) {
+        if (type === "heart") continue;
+        damage += amount * 90;
+      }
+
+      damage = Math.floor(damage * (1 + (combo - 1) * 0.35));
+
+      if (damage > 0) {
+        enemyHp = Math.max(0, enemyHp - damage);
+        enemyEl.classList.add("hit");
+        setTimeout(() => enemyEl.classList.remove("hit"), 140);
+      }
+
+      updateEnemyHp();
+      return damage;
+    }
+
+    function updateEnemyHp() {
+      enemyHpText.textContent = enemyHp;
+      const percent = Math.max(0, enemyHp / enemyMaxHp * 100);
+      enemyHpBar.style.width = `${percent}%`;
+    }
+
+    async function resolveBoard() {
+      locked = true;
+      let combo = 0;
+      let totalDamage = 0;
+
+      while (true) {
+        const matches = findMatches();
+        if (matches.length === 0) break;
+
+        combo++;
+        bestCombo = Math.max(bestCombo, combo);
+        bestComboText.textContent = bestCombo;
+
+        const damage = attack(matches, combo);
+        totalDamage += damage;
+        messageEl.textContent = `${combo}コンボ！ ${damage}ダメージ`;
+
+        clearMatches(matches);
+        await sleep(240);
+        dropOrbs();
+        renderBoard();
+        await sleep(240);
+      }
+
+      if (combo === 0) {
+        messageEl.textContent = "消えなかった！もう一回動かそう";
+      } else if (enemyHp <= 0) {
+        messageEl.textContent = `撃破！ 合計${totalDamage}ダメージ！`;
+      } else {
+        messageEl.textContent = `${combo}コンボ！ 合計${totalDamage}ダメージ！`;
+      }
+
+      locked = false;
+    }
+
+    function resetGame() {
+      enemyHp = enemyMaxHp;
+      bestCombo = 0;
+      bestComboText.textContent = bestCombo;
+      updateEnemyHp();
+      createBoard();
+      messageEl.textContent = "ドロップを長押しして動かそう！";
+    }
+
+    function reviveEnemy() {
+      enemyHp = enemyMaxHp;
+      updateEnemyHp();
+      messageEl.textContent = "敵が復活した！";
+    }
+
+    boardWrap.addEventListener("mousedown", startDrag);
+    window.addEventListener("mousemove", moveDrag);
+    window.addEventListener("mouseup", endDrag);
+
+    boardWrap.addEventListener("touchstart", startDrag, { passive: false });
+    window.addEventListener("touchmove", moveDrag, { passive: false });
+    window.addEventListener("touchend", endDrag);
+
+    resetBtn.addEventListener("click", resetGame);
+    healBtn.addEventListener("click", reviveEnemy);
+
+    resetGame();
+  </script></body>
+</html>
