@@ -21,7 +21,7 @@ body{display:flex;justify-content:center}
 .enemy-hp-bar{height:100%;width:100%;background:linear-gradient(90deg,#22c55e,#bef264);transition:.25s}
 .message{background:#020617;border-radius:12px;min-height:35px;padding:7px;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff3ad;font-size:15px;font-weight:bold}
 .party{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
-.member{background:#1e293b;border-radius:9px;padding:3px;text-align:center}
+.member{background:#1e293b;border-radius:9px;padding:3px;text-align:center;position:relative}
 .member .atk{font-size:10px;color:#fde68a;font-weight:bold}
 .member .icon{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold}
 .member .name{font-size:9px}
@@ -45,8 +45,11 @@ body{display:flex;justify-content:center}
 .buttons{display:flex;gap:6px}
 button{flex:1;border:0;border-radius:12px;padding:8px;font-size:14px;font-weight:bold;background:#eef2ff;color:#111827}
 .status{font-size:11px;color:#cbd5e1;line-height:1.35;background:#020617;border-radius:10px;padding:6px}
-.float{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:900;pointer-events:none;animation:floatUp .9s forwards;text-shadow:0 2px 4px #000;z-index:50}
-.damage{color:#ffe066}.healNum{color:#5dff9d}.hurt{color:#ff7b7b}
+.float{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:900;pointer-events:none;animation:floatUp .9s forwards;text-shadow:0 2px 4px #000;z-index:50;white-space:nowrap}
+.member .float{font-size:15px}
+.damage{color:#ffe066}
+.healNum{color:#5dff9d}
+.hurt{color:#ff7b7b}
 @keyframes floatUp{20%{opacity:1;transform:translate(-50%,-65%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-145%) scale(1)}}
 .fire,.fire-bg{background:radial-gradient(circle at 30% 30%,#ffd4a8,#ef4444)}
 .water,.water-bg{background:radial-gradient(circle at 30% 30%,#d7f1ff,#3b82f6)}
@@ -400,23 +403,64 @@ function attrRate(a,d){
 }
 
 function calcDamage(groups,combo){
- let dmg=0,heal=0;
+ let heal=0;
+ const memberDamage={};
  const cm=comboMul(combo),lm=leaderMul(combo);
+
  groups.forEach(g=>{
   const om=orbMul(g.count);
-  if(g.type==="heart"){heal+=Math.floor(totalRcv*om*cm);return}
-  members.filter(m=>m.attr===g.type).forEach(m=>{
-   dmg+=Math.floor(m.atk*om*cm*lm*attrRate(m.attr,enemyAttr));
+
+  if(g.type==="heart"){
+   heal+=Math.floor(totalRcv*om*cm);
+   return;
+  }
+
+  members.forEach((m,index)=>{
+   if(m.attr!==g.type)return;
+
+   const damage=Math.floor(
+    m.atk*
+    om*
+    cm*
+    lm*
+    attrRate(m.attr,enemyAttr)
+   );
+
+   memberDamage[index]=(memberDamage[index]||0)+damage;
   });
  });
- return{dmg,heal,lm};
+
+ return{memberDamage,heal,lm};
 }
 
 function applyResult(res,combo){
- if(res.heal>0){playerHp=Math.min(playerMaxHp,playerHp+res.heal);pop(playerArea,"+"+res.heal,"healNum");flash(playerArea,"heal")}
- if(res.dmg>0){enemyHp=Math.max(0,enemyHp-res.dmg);pop(enemyIcon,res.dmg,"damage");flash(enemyIcon,"hit")}
+ if(res.heal>0){
+  playerHp=Math.min(playerMaxHp,playerHp+res.heal);
+  pop(playerArea,"+"+res.heal,"healNum");
+  flash(playerArea,"heal");
+ }
+
+ let totalDamage=0;
+
+ members.forEach((m,index)=>{
+  const damage=res.memberDamage[index]||0;
+  totalDamage+=damage;
+
+  const card=partyEl.children[index];
+  if(damage>0&&card){
+   pop(card,damage,"damage");
+  }
+ });
+
+ if(totalDamage>0){
+  enemyHp=Math.max(0,enemyHp-totalDamage);
+  pop(enemyIcon,totalDamage,"damage");
+  flash(enemyIcon,"hit");
+ }
+
  updateHp();
- let text=combo+"コンボ！ "+res.dmg+"ダメージ！";
+
+ let text=combo+"コンボ！ "+totalDamage+"ダメージ！";
  if(res.heal>0)text+=" HP"+res.heal+"回復！";
  if(res.lm>1)text+=" LS"+res.lm+"倍！";
  if(enemyHp<=0)text+=" 撃破！";
@@ -500,17 +544,32 @@ function setEnemy(){
 }
 
 function updateHp(){
- enemyHpText.textContent=enemyHp;enemyMaxHpText.textContent=enemyMaxHp;enemyHpBar.style.width=(enemyHp/enemyMaxHp*100)+"%";
- playerHpText.textContent=playerHp;playerMaxHpText.textContent=playerMaxHp;playerHpBar.style.width=(playerHp/playerMaxHp*100)+"%";
+ enemyHpText.textContent=enemyHp;
+ enemyMaxHpText.textContent=enemyMaxHp;
+ enemyHpBar.style.width=(enemyHp/enemyMaxHp*100)+"%";
+ playerHpText.textContent=playerHp;
+ playerMaxHpText.textContent=playerMaxHp;
+ playerHpBar.style.width=(playerHp/playerMaxHp*100)+"%";
  enemyTurnText.textContent=enemyTurn;
 }
 
 function resetDungeon(){
- stopTimer();removeDragGhost();
- dragging=false;movedOnce=false;resolving=false;selected=null;heldType=null;
- floorIndex=0;playerHp=playerMaxHp;tempDrops=[];tempGacha=0;
- timerText.textContent="5.0";timerBar.style.width="100%";
- setEnemy();createBoard();updateStatus();
+ stopTimer();
+ removeDragGhost();
+ dragging=false;
+ movedOnce=false;
+ resolving=false;
+ selected=null;
+ heldType=null;
+ floorIndex=0;
+ playerHp=playerMaxHp;
+ tempDrops=[];
+ tempGacha=0;
+ timerText.textContent="5.0";
+ timerBar.style.width="100%";
+ setEnemy();
+ createBoard();
+ updateStatus();
  message.textContent=save.cleared[dungeon.id]?"ドロップを動かしたら5秒開始":"初回クリア報酬：ガチャ素材20個";
 }
 
