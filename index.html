@@ -3,423 +3,1451 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>パズルRPG Phase1</title>
+<title>パズルRPG</title>
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;height:100%;overflow:hidden;background:#0f172a;color:white;font-family:sans-serif;touch-action:none}
-body{display:flex;justify-content:center}
-.game{width:100%;max-width:430px;height:100svh;padding:8px;display:flex;flex-direction:column;gap:7px}
-.screen{display:none;height:100%;flex-direction:column;gap:8px}
-.screen.active{display:flex}
-.card{background:#111827;border-radius:15px;padding:10px;position:relative}
-.title{text-align:center;font-size:28px;font-weight:900;color:#fff3ad;margin:10px 0}
-.menu{display:flex;flex-direction:column;gap:10px}
-button{border:0;border-radius:14px;padding:12px;font-size:17px;font-weight:900;background:#eef2ff;color:#111827}
-.small-btn{font-size:14px;padding:8px}
-.row{display:flex;gap:7px}.row button{flex:1}
-.status{font-size:12px;color:#cbd5e1;line-height:1.5;background:#020617;border-radius:10px;padding:7px}
-.message{background:#020617;border-radius:12px;min-height:35px;padding:7px;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff3ad;font-size:15px;font-weight:bold}
-.enemy-area{display:flex;gap:8px;align-items:center}
-.enemy{width:56px;height:56px;border-radius:50%;position:relative;flex-shrink:0}
-.enemy.hit{animation:hit .18s}
-@keyframes hit{50%{transform:scale(.84);filter:brightness(2)}}
-.enemy-info{flex:1;font-size:12px;color:#cbd5e1;padding-right:60px}
-.enemy-name{font-size:18px;font-weight:bold;color:white}
-.hp-wrap{height:12px;background:#020617;border-radius:999px;overflow:hidden;margin:4px 0}
-.enemy-hp-bar{height:100%;width:100%;background:linear-gradient(90deg,#22c55e,#bef264);transition:.25s}
-.top-retreat{position:absolute;right:8px;top:8px;padding:6px 10px;font-size:12px;border-radius:999px;background:#fee2e2;color:#991b1b}
-.party{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
-.member{background:#1e293b;border-radius:9px;padding:3px;text-align:center;position:relative}
-.member .atk{font-size:10px;color:#fde68a;font-weight:bold}
-.member .icon{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold}
-.member .name{font-size:9px}
-.player{background:#111827;border-radius:12px;padding:7px;position:relative}
-.player.hit{animation:shake .25s}.player.heal{animation:heal .25s}
-@keyframes shake{25%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
-@keyframes heal{50%{filter:brightness(1.8)}}
-.hp-text{display:flex;justify-content:space-between;font-size:13px;font-weight:bold;margin-bottom:4px}
-.player-hp-bar{height:12px;background:#020617;border-radius:999px;overflow:hidden}
-.player-hp-inner{height:100%;width:100%;background:linear-gradient(90deg,#ef4444,#f97316,#facc15);transition:.25s}
-.timer{display:flex;gap:6px;align-items:center;font-size:13px;font-weight:bold}
-.timer-wrap{flex:1;height:9px;background:#020617;border-radius:999px;overflow:hidden}
-.timer-bar{height:100%;width:100%;background:#38bdf8}
-.board-wrap{background:#1f2937;border-radius:18px;padding:6px;flex:1;display:flex;position:relative;overflow:hidden;min-height:285px}
-.board{width:100%;height:100%;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(5,1fr);gap:4px}
-.orb{border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(24px,8.7vw,38px);font-weight:bold;transition:transform .08s ease,opacity .08s ease}
-.orb.held{opacity:.2;transform:scale(.9)}.orb.clear{opacity:0;transform:scale(.1)}
-.drag-orb{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(26px,9vw,40px);font-weight:bold;pointer-events:none;z-index:100;transform:translate(-50%,-50%) scale(1.08);box-shadow:0 8px 20px rgba(0,0,0,.45);opacity:.98}
-.float{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:900;pointer-events:none;animation:floatUp .9s forwards;text-shadow:0 2px 4px #000;z-index:50;white-space:nowrap}
-.member .float{font-size:15px}
-.damage{color:#ffe066}.healNum{color:#5dff9d}.hurt{color:#ff7b7b}
-@keyframes floatUp{20%{opacity:1;transform:translate(-50%,-65%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-145%) scale(1)}}
-.fire,.fire-bg{background:radial-gradient(circle at 30% 30%,#ffd4a8,#ef4444)}
-.water,.water-bg{background:radial-gradient(circle at 30% 30%,#d7f1ff,#3b82f6)}
-.wood,.wood-bg{background:radial-gradient(circle at 30% 30%,#e4ffd8,#22c55e)}
-.light,.light-bg{background:radial-gradient(circle at 30% 30%,#fffad1,#facc15);color:#111827}
-.dark,.dark-bg{background:radial-gradient(circle at 30% 30%,#f5d0fe,#9333ea)}
-.none,.none-bg{background:radial-gradient(circle at 30% 30%,#eee,#64748b)}
-.heart{background:radial-gradient(circle at 30% 30%,#ffe4f0,#ec4899)}
-.list{overflow:auto;display:flex;flex-direction:column;gap:6px;padding-bottom:8px}
-.char-row{background:#1e293b;border-radius:10px;padding:8px;font-size:13px;display:flex;justify-content:space-between;align-items:center}
-.result-box{background:#111827;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
-.result-title{text-align:center;font-size:26px;font-weight:900;color:#fff3ad}
-.result-item{background:#020617;border-radius:12px;padding:10px;font-size:15px;line-height:1.5}
-.result-list{max-height:240px;overflow:auto;display:flex;flex-direction:column;gap:6px}
-.drop-row{background:#1e293b;border-radius:10px;padding:8px;font-size:13px}
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+user-select:none;
+-webkit-user-select:none;
+-webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+width:100%;
+height:100%;
+overflow:hidden;
+background:#0f172a;
+font-family:sans-serif;
+color:white;
+touch-action:none;
+}
+
+body{
+display:flex;
+justify-content:center;
+}
+
+.game{
+width:100%;
+max-width:430px;
+height:100svh;
+padding:8px;
+display:flex;
+flex-direction:column;
+gap:8px;
+}
+
+.screen{
+display:none;
+height:100%;
+flex-direction:column;
+gap:8px;
+}
+
+.screen.active{
+display:flex;
+}
+
+.title{
+font-size:28px;
+font-weight:900;
+text-align:center;
+color:#fff3ad;
+margin-top:8px;
+}
+
+.card{
+background:#111827;
+border-radius:16px;
+padding:10px;
+position:relative;
+}
+
+button{
+border:none;
+border-radius:14px;
+padding:12px;
+font-size:17px;
+font-weight:900;
+background:#eef2ff;
+color:#111827;
+}
+
+.menu{
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.status{
+background:#020617;
+border-radius:12px;
+padding:10px;
+font-size:13px;
+line-height:1.6;
+color:#cbd5e1;
+}
+
+.enemy-area{
+display:flex;
+gap:8px;
+align-items:center;
+}
+
+.enemy{
+width:58px;
+height:58px;
+border-radius:50%;
+flex-shrink:0;
+position:relative;
+}
+
+.enemy.hit{
+animation:enemyHit .2s;
+}
+
+@keyframes enemyHit{
+50%{
+transform:scale(.8);
+filter:brightness(2);
+}
+}
+
+.enemy-info{
+flex:1;
+padding-right:60px;
+font-size:12px;
+}
+
+.enemy-name{
+font-size:18px;
+font-weight:900;
+color:white;
+}
+
+.hp-wrap{
+height:12px;
+background:#020617;
+border-radius:999px;
+overflow:hidden;
+margin:4px 0;
+}
+
+.enemy-hp-bar{
+height:100%;
+width:100%;
+background:linear-gradient(90deg,#22c55e,#bef264);
+transition:.25s;
+}
+
+.top-retreat{
+position:absolute;
+right:8px;
+top:8px;
+padding:6px 10px;
+font-size:12px;
+border-radius:999px;
+background:#fee2e2;
+color:#991b1b;
+}
+
+.party{
+display:grid;
+grid-template-columns:repeat(6,1fr);
+gap:4px;
+}
+
+.member{
+background:#1e293b;
+border-radius:10px;
+padding:3px;
+text-align:center;
+position:relative;
+}
+
+.member .atk{
+font-size:10px;
+color:#fde68a;
+font-weight:900;
+}
+
+.member .icon{
+width:100%;
+aspect-ratio:1;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:16px;
+font-weight:900;
+}
+
+.member .name{
+font-size:9px;
+}
+
+.player{
+background:#111827;
+border-radius:12px;
+padding:7px;
+position:relative;
+}
+
+.player.hit{
+animation:shake .25s;
+}
+
+.player.heal{
+animation:heal .25s;
+}
+
+@keyframes shake{
+25%{transform:translateX(-4px)}
+50%{transform:translateX(4px)}
+}
+
+@keyframes heal{
+50%{filter:brightness(1.8)}
+}
+
+.hp-text{
+display:flex;
+justify-content:space-between;
+font-size:13px;
+font-weight:900;
+margin-bottom:4px;
+}
+
+.player-hp-bar{
+height:12px;
+background:#020617;
+border-radius:999px;
+overflow:hidden;
+}
+
+.player-hp-inner{
+height:100%;
+width:100%;
+background:linear-gradient(90deg,#ef4444,#f97316,#facc15);
+transition:.25s;
+}
+
+.timer{
+display:flex;
+gap:6px;
+align-items:center;
+font-size:13px;
+font-weight:900;
+}
+
+.timer-wrap{
+flex:1;
+height:9px;
+background:#020617;
+border-radius:999px;
+overflow:hidden;
+}
+
+.timer-bar{
+height:100%;
+width:100%;
+background:#38bdf8;
+}
+
+.board-wrap{
+background:#1f2937;
+border-radius:18px;
+padding:6px;
+flex:1;
+display:flex;
+position:relative;
+overflow:hidden;
+min-height:310px;
+}
+
+.board{
+width:100%;
+height:100%;
+display:grid;
+grid-template-columns:repeat(6,1fr);
+grid-template-rows:repeat(5,1fr);
+gap:4px;
+}
+
+.orb{
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:clamp(25px,9vw,40px);
+font-weight:900;
+transition:transform .07s ease,opacity .07s ease;
+}
+
+.orb.held{
+opacity:.15;
+transform:scale(.9);
+}
+
+.orb.clear{
+opacity:0;
+transform:scale(.1);
+}
+
+.drag-orb{
+position:absolute;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:clamp(25px,9vw,40px);
+font-weight:900;
+pointer-events:none;
+z-index:100;
+transform:translate(-50%,-50%) scale(1.08);
+box-shadow:0 8px 20px rgba(0,0,0,.45);
+}
+
+.float{
+position:absolute;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+font-size:24px;
+font-weight:900;
+pointer-events:none;
+animation:floatUp 1.6s forwards;
+text-shadow:0 2px 4px #000;
+z-index:50;
+white-space:nowrap;
+}
+
+.member .float{
+font-size:15px;
+}
+
+.damage{
+color:#ffe066;
+}
+
+.healNum{
+color:#5dff9d;
+}
+
+.hurt{
+color:#ff7b7b;
+}
+
+@keyframes floatUp{
+20%{
+opacity:1;
+transform:translate(-50%,-65%) scale(1.1);
+}
+100%{
+opacity:0;
+transform:translate(-50%,-145%) scale(1);
+}
+}
+
+.combo-effect{
+position:fixed;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+font-size:42px;
+font-weight:900;
+color:#fff3ad;
+text-shadow:
+0 0 12px #facc15,
+0 0 24px #f59e0b,
+0 4px 10px #000;
+pointer-events:none;
+z-index:9999;
+animation:comboAnim .9s forwards;
+}
+
+@keyframes comboAnim{
+0%{
+opacity:0;
+transform:translate(-50%,-50%) scale(.4);
+}
+20%{
+opacity:1;
+transform:translate(-50%,-50%) scale(1.25);
+}
+70%{
+opacity:1;
+transform:translate(-50%,-50%) scale(1);
+}
+100%{
+opacity:0;
+transform:translate(-50%,-80%) scale(1.1);
+}
+}
+
+.fire,.fire-bg{
+background:radial-gradient(circle at 30% 30%,#ffd4a8,#ef4444);
+}
+
+.water,.water-bg{
+background:radial-gradient(circle at 30% 30%,#d7f1ff,#3b82f6);
+}
+
+.wood,.wood-bg{
+background:radial-gradient(circle at 30% 30%,#e4ffd8,#22c55e);
+}
+
+.light,.light-bg{
+background:radial-gradient(circle at 30% 30%,#fffad1,#facc15);
+color:#111827;
+}
+
+.dark,.dark-bg{
+background:radial-gradient(circle at 30% 30%,#f5d0fe,#9333ea);
+}
+
+.none,.none-bg{
+background:radial-gradient(circle at 30% 30%,#eee,#64748b);
+}
+
+.heart{
+background:radial-gradient(circle at 30% 30%,#ffe4f0,#ec4899);
+}
+
+.message{
+background:#020617;
+border-radius:12px;
+min-height:38px;
+padding:7px;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+font-size:15px;
+font-weight:900;
+color:#fff3ad;
+}
+
+.list{
+overflow:auto;
+display:flex;
+flex-direction:column;
+gap:6px;
+padding-bottom:8px;
+}
+
+.char-row{
+background:#1e293b;
+border-radius:10px;
+padding:8px;
+font-size:13px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.result-box{
+background:#111827;
+border-radius:16px;
+padding:14px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.result-title{
+text-align:center;
+font-size:26px;
+font-weight:900;
+color:#fff3ad;
+}
+
+.result-item{
+background:#020617;
+border-radius:12px;
+padding:10px;
+font-size:15px;
+line-height:1.5;
+}
+
+.result-list{
+max-height:240px;
+overflow:auto;
+display:flex;
+flex-direction:column;
+gap:6px;
+}
+
+.drop-row{
+background:#1e293b;
+border-radius:10px;
+padding:8px;
+font-size:13px;
+}
 </style>
 </head>
+
 <body>
+
 <div class="game">
 
 <section id="home" class="screen active">
-  <div class="title">パズルRPG</div>
-  <div class="status" id="homeStatus"></div>
-  <div class="menu">
-    <button onclick="showScreen('dungeonMenu')">ダンジョン</button>
-    <button onclick="showScreen('charMenu')">キャラ</button>
-    <button onclick="showScreen('gacha')">ガチャ</button>
-  </div>
+
+<div class="title">
+パズルRPG
+</div>
+
+<div class="status" id="homeStatus"></div>
+
+<div class="menu">
+<button onclick="showScreen('dungeonMenu')">ダンジョン</button>
+<button onclick="showScreen('charMenu')">キャラ</button>
+<button onclick="showScreen('gacha')">ガチャ</button>
+</div>
+
 </section>
 
 <section id="dungeonMenu" class="screen">
-  <div class="title">ダンジョン</div>
-  <div class="menu">
-    <button onclick="startDungeon('normal')">ノーマルダンジョン</button>
-    <button onclick="startDungeon('skill')">スキル強化ダンジョン</button>
-    <button onclick="startDungeon('awake')">覚醒ダンジョン</button>
-    <button onclick="showScreen('home')">戻る</button>
-  </div>
-  <div class="status">
-    ノーマル：ゴールド・ガチャ石・キャラ集め<br>
-    スキル：No.7〜12素材がランダム出現<br>
-    覚醒：No.13〜18素材がランダム出現
-  </div>
+
+<div class="title">
+ダンジョン
+</div>
+
+<div class="menu">
+<button onclick="startDungeon('normal')">ノーマルダンジョン</button>
+<button onclick="startDungeon('skill')">スキル強化ダンジョン</button>
+<button onclick="startDungeon('awake')">覚醒ダンジョン</button>
+<button onclick="showScreen('home')">戻る</button>
+</div>
+
 </section>
 
 <section id="charMenu" class="screen">
-  <div class="title">キャラ一覧</div>
-  <button class="small-btn" onclick="showScreen('home')">戻る</button>
-  <div class="list" id="charList"></div>
+
+<div class="title">
+キャラ一覧
+</div>
+
+<button onclick="showScreen('home')">
+戻る
+</button>
+
+<div class="list" id="charList"></div>
+
 </section>
 
 <section id="gacha" class="screen">
-  <div class="title">ガチャ</div>
-  <div class="card">
-    ガチャ画面はPhase4で実装予定。<br>
-    現在のガチャ石：<span id="gachaStoneText">0</span>
-  </div>
-  <button onclick="showScreen('home')">戻る</button>
+
+<div class="title">
+ガチャ
+</div>
+
+<div class="card">
+現在のガチャ石：
+<span id="gachaStoneText">0</span>
+</div>
+
+<button onclick="showScreen('home')">
+戻る
+</button>
+
 </section>
 
 <section id="result" class="screen">
-  <div class="result-box">
-    <div class="result-title">ダンジョンクリア！</div>
-    <div class="result-item" id="resultSummary"></div>
-    <div class="result-item">
-      <b>獲得キャラ</b>
-      <div class="result-list" id="resultDrops"></div>
-    </div>
-    <div class="row">
-      <button onclick="showScreen('home')">ホームへ</button>
-      <button onclick="showScreen('dungeonMenu')">ダンジョンへ</button>
-    </div>
-  </div>
+
+<div class="result-box">
+
+<div class="result-title">
+ダンジョンクリア！
+</div>
+
+<div class="result-item" id="resultSummary"></div>
+
+<div class="result-item">
+<b>獲得キャラ</b>
+<div class="result-list" id="resultDrops"></div>
+</div>
+
+<div class="menu">
+<button onclick="showScreen('home')">
+ホームへ
+</button>
+
+<button onclick="showScreen('dungeonMenu')">
+ダンジョンへ
+</button>
+</div>
+
+</div>
+
 </section>
 
 <section id="battle" class="screen">
-  <div class="card">
-    <button class="top-retreat" onclick="retreatDungeon()">撤退</button>
-    <div class="enemy-area">
-      <div class="enemy wood-bg" id="enemyIcon"></div>
-      <div class="enemy-info">
-        <div class="enemy-name" id="enemyName">敵</div>
-        <div><span id="battleTypeText">ノーマル</span> / 階層：<span id="floorText">1</span>/5 / 属性：<span id="enemyAttrText">木</span> / 攻撃：<span id="enemyAtkText">850</span> / 攻撃まで：<span id="enemyTurnText">1</span></div>
-        <div class="hp-wrap"><div class="enemy-hp-bar" id="enemyHpBar"></div></div>
-        <div>敵HP：<span id="enemyHpText">5000</span>/<span id="enemyMaxHpText">5000</span></div>
-      </div>
-    </div>
-  </div>
 
-  <div class="message" id="message">ドロップを動かしたら5秒開始</div>
-  <div class="party" id="party"></div>
+<div class="card">
 
-  <div class="player" id="playerArea">
-    <div class="hp-text">
-      <span>味方HP</span>
-      <span><span id="playerHpText">5550</span>/<span id="playerMaxHpText">5550</span></span>
-    </div>
-    <div class="player-hp-bar"><div class="player-hp-inner" id="playerHpBar"></div></div>
-  </div>
+<button class="top-retreat" onclick="retreatDungeon()">
+撤退
+</button>
 
-  <div class="timer">
-    <span>操作 <span id="timerText">5.0</span>秒</span>
-    <div class="timer-wrap"><div class="timer-bar" id="timerBar"></div></div>
-  </div>
+<div class="enemy-area">
 
-  <div class="board-wrap" id="boardWrap">
-    <div class="board" id="board"></div>
-  </div>
+<div class="enemy wood-bg" id="enemyIcon"></div>
+
+<div class="enemy-info">
+
+<div class="enemy-name" id="enemyName">
+敵
+</div>
+
+<div>
+<span id="battleTypeText">ノーマル</span>
+/
+階層：
+<span id="floorText">1</span>/5
+/
+属性：
+<span id="enemyAttrText">木</span>
+/
+攻撃：
+<span id="enemyAtkText">850</span>
+/
+攻撃まで：
+<span id="enemyTurnText">1</span>
+</div>
+
+<div class="hp-wrap">
+<div class="enemy-hp-bar" id="enemyHpBar"></div>
+</div>
+
+<div>
+敵HP：
+<span id="enemyHpText">5000</span>
+/
+<span id="enemyMaxHpText">5000</span>
+</div>
+
+</div>
+</div>
+</div>
+
+<div class="message" id="message">
+ドロップを動かしたら5秒開始
+</div>
+
+<div class="party" id="party"></div>
+
+<div class="player" id="playerArea">
+
+<div class="hp-text">
+<span>味方HP</span>
+<span>
+<span id="playerHpText">0</span>
+/
+<span id="playerMaxHpText">0</span>
+</span>
+</div>
+
+<div class="player-hp-bar">
+<div class="player-hp-inner" id="playerHpBar"></div>
+</div>
+
+</div>
+
+<div class="timer">
+
+<span>
+操作
+<span id="timerText">5.0</span>
+秒
+</span>
+
+<div class="timer-wrap">
+<div class="timer-bar" id="timerBar"></div>
+</div>
+
+</div>
+
+<div class="board-wrap" id="boardWrap">
+<div class="board" id="board"></div>
+</div>
+
 </section>
 
 </div>
 
 <script>
 const ROWS=5,COLS=6,MOVE_TIME=5;
-const TYPES=["fire","water","wood","light","dark","heart"];
-const ICONS={fire:"火",water:"水",wood:"木",light:"光",dark:"闇",heart:"♡"};
-const JP={fire:"火",water:"水",wood:"木",light:"光",dark:"闇",heart:"回復",none:"無"};
-const BG={fire:"fire-bg",water:"water-bg",wood:"wood-bg",light:"light-bg",dark:"dark-bg",none:"none-bg"};
 
-const baseChars=[
- {no:1,rarity:1,attr:"fire",hp:500,atk:150,rcv:15,type:"battle"},
- {no:2,rarity:1,attr:"water",hp:1500,atk:50,rcv:45,type:"battle"},
- {no:3,rarity:1,attr:"wood",hp:1000,atk:100,rcv:30,type:"battle"},
- {no:4,rarity:1,attr:"dark",hp:750,atk:180,rcv:0,type:"battle"},
- {no:5,rarity:1,attr:"light",hp:1200,atk:100,rcv:50,type:"battle"},
- {no:6,rarity:1,attr:"fire",hp:600,atk:130,rcv:25,type:"battle"}
+const TYPES=[
+"fire",
+"water",
+"wood",
+"light",
+"dark",
+"heart"
 ];
 
-const materialChars=[
- {no:7,rarity:5,attr:"fire",hp:1,atk:1,rcv:1,type:"skill",target:"fire"},
- {no:8,rarity:5,attr:"water",hp:1,atk:1,rcv:1,type:"skill",target:"water"},
- {no:9,rarity:5,attr:"wood",hp:1,atk:1,rcv:1,type:"skill",target:"wood"},
- {no:10,rarity:5,attr:"dark",hp:1,atk:1,rcv:1,type:"skill",target:"dark"},
- {no:11,rarity:5,attr:"light",hp:1,atk:1,rcv:1,type:"skill",target:"light"},
- {no:12,rarity:10,attr:"none",hp:1,atk:1,rcv:1,type:"skill",target:"any"},
- {no:13,rarity:5,attr:"fire",hp:1,atk:1,rcv:1,type:"awake",target:"fire"},
- {no:14,rarity:5,attr:"water",hp:1,atk:1,rcv:1,type:"awake",target:"water"},
- {no:15,rarity:5,attr:"wood",hp:1,atk:1,rcv:1,type:"awake",target:"wood"},
- {no:16,rarity:5,attr:"dark",hp:1,atk:1,rcv:1,type:"awake",target:"dark"},
- {no:17,rarity:5,attr:"light",hp:1,atk:1,rcv:1,type:"awake",target:"light"},
- {no:18,rarity:10,attr:"none",hp:1,atk:1,rcv:1,type:"awake",target:"any"}
-];
-
-const normalEnemies=[
- {name:"モリスライム",attr:"wood",hp:5000,atk:850,turn:1,drop:{no:101,name:"モリスライム",attr:"wood",rarity:1,type:"battle",hp:300,atk:50,rcv:10}},
- {name:"アクアゴブリン",attr:"water",hp:6200,atk:900,turn:2,drop:{no:102,name:"アクアゴブリン",attr:"water",rarity:1,type:"battle",hp:350,atk:60,rcv:8}},
- {name:"ファイアドラゴン",attr:"fire",hp:7600,atk:1100,turn:2,drop:{no:103,name:"ファイアドラゴン",attr:"fire",rarity:2,type:"battle",hp:500,atk:90,rcv:5}},
- {name:"ダークナイト",attr:"dark",hp:9000,atk:1300,turn:2,drop:{no:104,name:"ダークナイト",attr:"dark",rarity:2,type:"battle",hp:450,atk:100,rcv:0}},
- {name:"ライトゴーレム",attr:"light",hp:11000,atk:1500,turn:3,drop:{no:105,name:"ライトゴーレム",attr:"light",rarity:2,type:"battle",hp:700,atk:70,rcv:15}}
-];
-
-let save=JSON.parse(localStorage.getItem("puzzleRpgSave")||"null")||{
- money:0,stone:0,enhance:0,owned:[...baseChars.map(c=>({...c,count:1}))],clearedNormal:0,cleared:{}
+const ICONS={
+fire:"火",
+water:"水",
+wood:"木",
+light:"光",
+dark:"闇",
+heart:"♡"
 };
 
-let party=baseChars;
-let currentType="normal",normalNo=1,floorIndex=0,floors=[];
-let tempDrops=[],tempStone=0,lastResult=null;
-let board=[],dragging=false,movedOnce=false,resolving=false,selected=null,timerId=null,dragGhost=null,heldType=null;
-let playerMaxHp=0,playerHp=0,totalRcv=0;
-let enemyHp=0,enemyMaxHp=0,enemyAttr="",enemyAtk=0,enemyTurn=1,enemyTurnMax=1;
+const JP={
+fire:"火",
+water:"水",
+wood:"木",
+light:"光",
+dark:"闇",
+heart:"回復",
+none:"無"
+};
+
+const BG={
+fire:"fire-bg",
+water:"water-bg",
+wood:"wood-bg",
+light:"light-bg",
+dark:"dark-bg",
+none:"none-bg"
+};
+
+const partyData=[
+{no:1,rarity:1,attr:"fire",hp:500,atk:150,rcv:15},
+{no:2,rarity:1,attr:"water",hp:1500,atk:50,rcv:45},
+{no:3,rarity:1,attr:"wood",hp:1000,atk:100,rcv:30},
+{no:4,rarity:1,attr:"dark",hp:750,atk:180,rcv:0},
+{no:5,rarity:1,attr:"light",hp:1200,atk:100,rcv:50},
+{no:6,rarity:1,attr:"fire",hp:600,atk:130,rcv:25}
+];
+
+let save=JSON.parse(localStorage.getItem("puzzleSave")||"null")||{
+money:0,
+stone:0,
+owned:[...partyData.map(c=>({...c,count:1}))],
+clearedNormal:0
+};
+
+let board=[];
+let selected=null;
+let dragging=false;
+let moved=false;
+let timerId=null;
+let dragGhost=null;
+let resolving=false;
+
+let playerMaxHp=0;
+let playerHp=0;
+let totalRcv=0;
+
+let enemyHp=5000;
+let enemyMaxHp=5000;
+let enemyAttr="wood";
+let enemyAtk=850;
 
 const $=id=>document.getElementById(id);
-const boardEl=$("board"),boardWrap=$("boardWrap"),partyEl=$("party"),message=$("message");
-const enemyIcon=$("enemyIcon"),enemyName=$("enemyName"),enemyHpBar=$("enemyHpBar");
-const enemyHpText=$("enemyHpText"),enemyMaxHpText=$("enemyMaxHpText"),enemyAttrText=$("enemyAttrText");
-const enemyAtkText=$("enemyAtkText"),enemyTurnText=$("enemyTurnText"),floorText=$("floorText");
-const playerArea=$("playerArea"),playerHpText=$("playerHpText"),playerMaxHpText=$("playerMaxHpText"),playerHpBar=$("playerHpBar");
-const timerText=$("timerText"),timerBar=$("timerBar");
 
-function saveData(){localStorage.setItem("puzzleRpgSave",JSON.stringify(save))}
-function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));$(id).classList.add("active");updateHome();if(id==="charMenu")renderCharList();if(id==="gacha")$("gachaStoneText").textContent=save.stone}
-function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a}
-function randomType(){return TYPES[Math.floor(Math.random()*TYPES.length)]}
-function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
-function pop(target,text,cls){const d=document.createElement("div");d.className="float "+cls;d.textContent=text;target.appendChild(d);setTimeout(()=>d.remove(),900)}
-function flash(el,cls){el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),260)}
+const boardEl=$("board");
+const boardWrap=$("boardWrap");
+const message=$("message");
+
+function saveData(){
+localStorage.setItem("puzzleSave",JSON.stringify(save));
+}
+
+function showScreen(id){
+
+document.querySelectorAll(".screen")
+.forEach(s=>s.classList.remove("active"));
+
+$(id).classList.add("active");
+
+updateHome();
+
+if(id==="charMenu"){
+renderCharList();
+}
+
+if(id==="gacha"){
+$("gachaStoneText").textContent=save.stone;
+}
+
+}
 
 function updateHome(){
- $("homeStatus").innerHTML=`ゴールド：${save.money}<br>ガチャ石：${save.stone}<br>ノーマル到達：ダンジョン${save.clearedNormal+1}`;
+
+$("homeStatus").innerHTML=
+`ゴールド：${save.money}<br>
+ガチャ石：${save.stone}<br>
+ノーマル到達：${save.clearedNormal+1}`;
+
 }
 
 function renderCharList(){
- const list=$("charList");list.innerHTML="";
- save.owned.forEach(c=>{
-  const row=document.createElement("div");
-  row.className="char-row";
-  const kind=c.type==="battle"?"戦闘":c.type==="skill"?"スキル素材":c.type==="awake"?"覚醒素材":"ドロップ";
-  row.innerHTML=`<span>★${c.rarity||1} No.${c.no} ${JP[c.attr]||c.attr} ${kind}</span><span>×${c.count||1}</span>`;
-  list.appendChild(row);
- });
-}
 
-function addOwned(char){
- const found=save.owned.find(c=>c.no===char.no);
- if(found)found.count=(found.count||1)+1;
- else save.owned.push({...char,count:1});
+const list=$("charList");
+
+list.innerHTML="";
+
+save.owned.forEach(c=>{
+
+const row=document.createElement("div");
+
+row.className="char-row";
+
+row.innerHTML=
+`<span>
+★${c.rarity}
+No.${c.no}
+${JP[c.attr]}
+</span>
+<span>
+×${c.count||1}
+</span>`;
+
+list.appendChild(row);
+
+});
+
 }
 
 function renderParty(){
- partyEl.innerHTML="";
- party=baseChars;
- playerMaxHp=party.reduce((s,m)=>s+m.hp,0);
- totalRcv=party.reduce((s,m)=>s+m.rcv,0);
- party.forEach(m=>{
-  const d=document.createElement("div");
-  d.className="member";
-  d.innerHTML=`<div class="atk">攻 ${m.atk}</div><div class="icon ${BG[m.attr]}">${JP[m.attr]}</div><div class="name">★${m.rarity} No.${m.no}</div>`;
-  partyEl.appendChild(d);
- });
+
+const party=$("party");
+
+party.innerHTML="";
+
+playerMaxHp=partyData.reduce((s,m)=>s+m.hp,0);
+
+totalRcv=partyData.reduce((s,m)=>s+m.rcv,0);
+
+playerHp=playerMaxHp;
+
+partyData.forEach(m=>{
+
+const d=document.createElement("div");
+
+d.className="member";
+
+d.innerHTML=
+`
+<div class="atk">
+攻 ${m.atk}
+</div>
+
+<div class="icon ${BG[m.attr]}">
+${JP[m.attr]}
+</div>
+
+<div class="name">
+★${m.rarity}
+</div>
+`;
+
+party.appendChild(d);
+
+});
+
+updatePlayerHp();
+
 }
 
-function pickMaterial(type){
- const pool=materialChars.filter(c=>c.type===type);
- const n=rand(1,100);
- if(n<=5)return pool.find(c=>c.rarity===10);
- const normals=pool.filter(c=>c.rarity===5);
- return normals[rand(0,normals.length-1)];
+function updatePlayerHp(){
+
+$("playerHpText").textContent=playerHp;
+
+$("playerMaxHpText").textContent=playerMaxHp;
+
+$("playerHpBar").style.width=
+(playerHp/playerMaxHp*100)+"%";
+
 }
 
-function makeMaterialEnemy(type){
- const m=pickMaterial(type);
- const universal=m.rarity===10;
- return{
-  name:`No.${m.no} ${universal?"万能":JP[m.attr]}${type==="skill"?"スキル":"覚醒"}素材`,
-  attr:m.attr==="none"?"light":m.attr,
-  hp:universal?22000:9500,
-  atk:universal?2600:1400,
-  turn:2,
-  drop:{...m,name:`No.${m.no}素材`,count:1},
-  dropRate:1,
-  gachaRate:0.35
- };
+function updateEnemyHp(){
+
+$("enemyHpText").textContent=enemyHp;
+
+$("enemyMaxHpText").textContent=enemyMaxHp;
+
+$("enemyHpBar").style.width=
+(enemyHp/enemyMaxHp*100)+"%";
+
 }
 
-function makeNormalFloors(){
- const arr=[];
- for(let i=0;i<5;i++){
-  const base=normalEnemies[i%normalEnemies.length];
-  let hpMul=1+(normalNo-1)*0.08+i*0.05;
-  let atkMul=1+(normalNo-1)*0.05+i*0.04;
-  if(i===4){hpMul*=1.5;atkMul*=1.2}
-  arr.push({...base,hp:Math.floor(base.hp*hpMul),atk:Math.floor(base.atk*atkMul),dropRate:0.45,gachaRate:0.35});
- }
- return arr;
+function createBoard(){
+
+board=[];
+
+for(let r=0;r<ROWS;r++){
+
+const row=[];
+
+for(let c=0;c<COLS;c++){
+
+row.push(
+TYPES[Math.floor(Math.random()*TYPES.length)]
+);
+
 }
 
-function startDungeon(type){
- currentType=type;
- normalNo=save.clearedNormal+1;
- floorIndex=0;tempDrops=[];tempStone=0;lastResult=null;
- if(type==="normal"){floors=makeNormalFloors();$("battleTypeText").textContent=`ノーマル${normalNo}`}
- if(type==="skill"){floors=Array.from({length:5},()=>makeMaterialEnemy("skill"));$("battleTypeText").textContent="スキル強化"}
- if(type==="awake"){floors=Array.from({length:5},()=>makeMaterialEnemy("awake"));$("battleTypeText").textContent="覚醒"}
- showScreen("battle");
- resetBattleState();
+board.push(row);
+
 }
 
-function resetBattleState(){
- stopTimer();removeDragGhost();
- dragging=false;movedOnce=false;resolving=false;selected=null;heldType=null;
- playerHp=playerMaxHp;
- timerText.textContent="5.0";timerBar.style.width="100%";
- setEnemy();createBoard();
- message.textContent="ドロップを動かしたら5秒開始";
+renderBoard();
+
 }
 
-function createBoard(){board=[];for(let r=0;r<ROWS;r++){const row=[];for(let c=0;c<COLS;c++)row.push(randomType());board.push(row)}renderBoard()}
-function renderBoard(){boardEl.innerHTML="";for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const o=document.createElement("div");o.className="orb "+board[r][c];o.textContent=ICONS[board[r][c]];if(selected&&selected.r===r&&selected.c===c&&dragging)o.classList.add("held");boardEl.appendChild(o)}}
-function getCell(x,y){const rect=boardEl.getBoundingClientRect(),cw=rect.width/COLS,ch=rect.height/ROWS;const c=Math.floor((x-rect.left)/cw),r=Math.floor((y-rect.top)/ch);if(r<0||c<0||r>=ROWS||c>=COLS)return null;return{r,c}}
-function getCellSize(){const rect=boardEl.getBoundingClientRect();return{w:rect.width/COLS-4,h:rect.height/ROWS-4}}
-function createDragGhost(type,x,y){removeDragGhost();const size=getCellSize();dragGhost=document.createElement("div");dragGhost.className="drag-orb "+type;dragGhost.textContent=ICONS[type];dragGhost.style.width=size.w+"px";dragGhost.style.height=size.h+"px";boardWrap.appendChild(dragGhost);moveDragGhost(x,y)}
-function moveDragGhost(x,y){if(!dragGhost)return;const rect=boardWrap.getBoundingClientRect();dragGhost.style.left=(x-rect.left)+"px";dragGhost.style.top=(y-rect.top)+"px"}
-function removeDragGhost(){if(dragGhost){dragGhost.remove();dragGhost=null}}
-function swap(a,b){const t=board[a.r][a.c];board[a.r][a.c]=board[b.r][b.c];board[b.r][b.c]=t}
-function isNear(a,b){return Math.abs(a.r-b.r)+Math.abs(a.c-b.c)===1}
+function renderBoard(){
 
-function startTimer(){stopTimer();const start=performance.now();timerId=setInterval(()=>{const left=Math.max(0,MOVE_TIME-(performance.now()-start)/1000);timerText.textContent=left.toFixed(1);timerBar.style.width=(left/MOVE_TIME*100)+"%";if(left<=0)endDrag()},50)}
-function stopTimer(){if(timerId){clearInterval(timerId);timerId=null}}
+boardEl.innerHTML="";
 
-function startDrag(e){e.preventDefault();if(resolving||playerHp<=0||enemyHp<=0)return;const cell=getCell(e.clientX,e.clientY);if(!cell)return;dragging=true;movedOnce=false;selected=cell;heldType=board[cell.r][cell.c];createDragGhost(heldType,e.clientX,e.clientY);renderBoard()}
-function moveOneStep(next){if(!selected||!next)return false;if(next.r<0||next.c<0||next.r>=ROWS||next.c>=COLS)return false;if(!isNear(selected,next))return false;if(!movedOnce){movedOnce=true;startTimer();message.textContent="操作中…"}swap(selected,next);selected=next;return true}
-function moveDrag(e){e.preventDefault();if(!dragging||!selected||resolving)return;moveDragGhost(e.clientX,e.clientY);const cell=getCell(e.clientX,e.clientY);if(!cell||(cell.r===selected.r&&cell.c===selected.c))return;const dr=cell.r-selected.r,dc=cell.c-selected.c,sr=Math.sign(dr),sc=Math.sign(dc);let changed=false;if(Math.abs(dc)>=Math.abs(dr)){if(sc)changed=moveOneStep({r:selected.r,c:selected.c+sc})||changed;if(sr)changed=moveOneStep({r:selected.r+sr,c:selected.c})||changed}else{if(sr)changed=moveOneStep({r:selected.r+sr,c:selected.c})||changed;if(sc)changed=moveOneStep({r:selected.r,c:selected.c+sc})||changed}if(changed)renderBoard()}
-function endDrag(e){if(e)e.preventDefault();if(!dragging)return;dragging=false;selected=null;heldType=null;stopTimer();removeDragGhost();renderBoard();if(!movedOnce)return;resolveBoard()}
+for(let r=0;r<ROWS;r++){
 
-function getMatchedMap(){const map={};for(let r=0;r<ROWS;r++){let count=1;for(let c=1;c<=COLS;c++){if(c<COLS&&board[r][c]&&board[r][c]===board[r][c-1])count++;else{if(count>=3)for(let k=0;k<count;k++)map[r+","+(c-1-k)]=true;count=1}}}for(let c=0;c<COLS;c++){let count=1;for(let r=1;r<=ROWS;r++){if(r<ROWS&&board[r][c]&&board[r][c]===board[r-1][c])count++;else{if(count>=3)for(let k=0;k<count;k++)map[(r-1-k)+","+c]=true;count=1}}}return map}
-function getGroups(){const matched=getMatchedMap(),visited={},groups=[],dirs=[[1,0],[-1,0],[0,1],[0,-1]];Object.keys(matched).forEach(key=>{if(visited[key])return;const [sr,sc]=key.split(",").map(Number),type=board[sr][sc],stack=[{r:sr,c:sc}],cells=[];visited[key]=true;while(stack.length){const cur=stack.pop();cells.push(cur);dirs.forEach(([dr,dc])=>{const nr=cur.r+dr,nc=cur.c+dc,nk=nr+","+nc;if(nr<0||nc<0||nr>=ROWS||nc>=COLS||!matched[nk]||visited[nk]||board[nr][nc]!==type)return;visited[nk]=true;stack.push({r:nr,c:nc})})}groups.push({type,cells,count:cells.length})});return groups}
+for(let c=0;c<COLS;c++){
 
-async function resolveBoard(){resolving=true;let combo=0,cleared=[];while(true){const groups=getGroups();if(!groups.length)break;for(const g of groups){combo++;cleared.push({...g,combo});message.textContent=combo+"コンボ！ "+JP[g.type]+"を"+g.count+"個消した";markClear(g.cells);await sleep(220);g.cells.forEach(cell=>board[cell.r][cell.c]=null);renderBoard();await sleep(80)}dropOrbs();renderBoard();await sleep(250)}if(combo===0){message.textContent="コンボなし";enemyAttack();resolving=false;return}const result=calcDamage(cleared,combo);applyResult(result,combo);await sleep(650);if(enemyHp<=0)floorClear();else enemyAttack();resolving=false}
-function markClear(cells){const orbs=[...boardEl.children];cells.forEach(cell=>{const i=cell.r*COLS+cell.c;if(orbs[i])orbs[i].classList.add("clear")})}
-function dropOrbs(){for(let c=0;c<COLS;c++){const remain=[];for(let r=ROWS-1;r>=0;r--)if(board[r][c])remain.push(board[r][c]);while(remain.length<ROWS)remain.push(randomType());for(let r=ROWS-1;r>=0;r--)board[r][c]=remain[ROWS-1-r]}}
+const orb=document.createElement("div");
 
-function comboMul(combo){return 1+(combo-1)*.25}
-function orbMul(count){return 1+(count-3)*.25}
-function leaderMul(combo){let m=1;if(combo>=5)m*=3;else if(combo>=4)m*=2;if(combo>=7)m*=5;return m}
-function attrRate(a,d){if(a==="fire"&&d==="wood")return 2;if(a==="fire"&&d==="water")return .5;if(a==="water"&&d==="fire")return 2;if(a==="water"&&d==="wood")return .5;if(a==="wood"&&d==="water")return 2;if(a==="wood"&&d==="fire")return .5;if(a==="light"&&d==="dark")return 2;if(a==="dark"&&d==="light")return 2;return 1}
-function calcDamage(groups,combo){let heal=0,memberDamage={};const cm=comboMul(combo),lm=leaderMul(combo);groups.forEach(g=>{const om=orbMul(g.count);if(g.type==="heart"){heal+=Math.floor(totalRcv*om*cm);return}party.forEach((m,index)=>{if(m.attr!==g.type)return;const damage=Math.floor(m.atk*om*cm*lm*attrRate(m.attr,enemyAttr));memberDamage[index]=(memberDamage[index]||0)+damage})});return{memberDamage,heal,lm}}
-function applyResult(res,combo){if(res.heal>0){playerHp=Math.min(playerMaxHp,playerHp+res.heal);pop(playerArea,"+"+res.heal,"healNum");flash(playerArea,"heal")}let totalDamage=0;party.forEach((m,index)=>{const damage=res.memberDamage[index]||0;totalDamage+=damage;const card=partyEl.children[index];if(damage>0&&card)pop(card,damage,"damage")});if(totalDamage>0){enemyHp=Math.max(0,enemyHp-totalDamage);pop(enemyIcon,totalDamage,"damage");flash(enemyIcon,"hit")}updateHp();let text=combo+"コンボ！ "+totalDamage+"ダメージ！";if(res.heal>0)text+=" HP"+res.heal+"回復！";if(res.lm>1)text+=" LS"+res.lm+"倍！";if(enemyHp<=0)text+=" 撃破！";message.textContent=text}
+orb.className="orb "+board[r][c];
 
-function enemyAttack(){if(enemyHp<=0||playerHp<=0)return;enemyTurn--;if(enemyTurn<=0){playerHp=Math.max(0,playerHp-enemyAtk);enemyTurn=enemyTurnMax;pop(playerArea,"-"+enemyAtk,"hurt");flash(playerArea,"hit");updateHp();if(playerHp<=0){tempDrops=[];tempStone=0;message.textContent="ゲームオーバー… 仮獲得は全て没収"}else message.textContent+=" / 敵の攻撃！"+enemyAtk+"ダメージ"}enemyTurnText.textContent=enemyTurn}
+orb.textContent=ICONS[board[r][c]];
 
-function floorClear(){
- const floor=floors[floorIndex];
- if(Math.random()<(floor.dropRate??1)){tempDrops.push(floor.drop);message.textContent+=" / "+(floor.drop.name||"キャラ")+"がドロップ！"}
- const key=currentType==="normal"?"normal_"+normalNo:currentType;
- const first=!save.cleared[key];
- if(!first&&Math.random()<(floor.gachaRate??0.35)){tempStone++;message.textContent+=" / ガチャ石+1"}
- setTimeout(()=>{if(floorIndex>=floors.length-1)clearDungeon(key,first);else{floorIndex++;setEnemy();createBoard();message.textContent="次の階層へ！"}},900);
+if(
+selected &&
+selected.r===r &&
+selected.c===c &&
+dragging
+){
+orb.classList.add("held");
 }
 
-function clearDungeon(key,first){
- const money=currentType==="normal"?rand(500+normalNo*80,1000+normalNo*120):rand(300,700);
- const stone=first?20:tempStone;
- const gotDrops=[...tempDrops];
+boardEl.appendChild(orb);
 
- save.money+=money;
- save.stone+=stone;
- gotDrops.forEach(addOwned);
- save.cleared[key]=true;
- if(currentType==="normal"&&normalNo>save.clearedNormal)save.clearedNormal=normalNo;
- saveData();
+}
 
- lastResult={money,stone,drops:gotDrops,first,type:currentType};
- tempDrops=[];tempStone=0;
- updateHome();
- showResult();
+}
+
+}
+
+function getCell(x,y){
+
+const rect=boardEl.getBoundingClientRect();
+
+const cw=rect.width/COLS;
+const ch=rect.height/ROWS;
+
+const c=Math.floor((x-rect.left)/cw);
+const r=Math.floor((y-rect.top)/ch);
+
+if(r<0||c<0||r>=ROWS||c>=COLS){
+return null;
+}
+
+return{r,c};
+
+}
+
+function createDragGhost(type,x,y){
+
+removeDragGhost();
+
+const rect=boardEl.getBoundingClientRect();
+
+const size=rect.width/COLS-4;
+
+dragGhost=document.createElement("div");
+
+dragGhost.className="drag-orb "+type;
+
+dragGhost.textContent=ICONS[type];
+
+dragGhost.style.width=size+"px";
+dragGhost.style.height=size+"px";
+
+boardWrap.appendChild(dragGhost);
+
+moveDragGhost(x,y);
+
+}
+
+function moveDragGhost(x,y){
+
+if(!dragGhost)return;
+
+const rect=boardWrap.getBoundingClientRect();
+
+dragGhost.style.left=(x-rect.left)+"px";
+dragGhost.style.top=(y-rect.top)+"px";
+
+}
+
+function removeDragGhost(){
+
+if(dragGhost){
+
+dragGhost.remove();
+
+dragGhost=null;
+
+}
+
+}
+
+function swap(a,b){
+
+const t=board[a.r][a.c];
+
+board[a.r][a.c]=board[b.r][b.c];
+
+board[b.r][b.c]=t;
+
+}
+
+function near(a,b){
+
+return Math.abs(a.r-b.r)+
+Math.abs(a.c-b.c)===1;
+
+}
+
+function startTimer(){
+
+stopTimer();
+
+const start=performance.now();
+
+timerId=setInterval(()=>{
+
+const left=Math.max(
+0,
+MOVE_TIME-(performance.now()-start)/1000
+);
+
+$("timerText").textContent=
+left.toFixed(1);
+
+$("timerBar").style.width=
+(left/MOVE_TIME*100)+"%";
+
+if(left<=0){
+endDrag();
+}
+
+},50);
+
+}
+
+function stopTimer(){
+
+if(timerId){
+
+clearInterval(timerId);
+
+timerId=null;
+
+}
+
+}
+
+function startDrag(e){
+
+e.preventDefault();
+
+if(resolving)return;
+
+const cell=getCell(e.clientX,e.clientY);
+
+if(!cell)return;
+
+dragging=true;
+
+moved=false;
+
+selected=cell;
+
+createDragGhost(
+board[cell.r][cell.c],
+e.clientX,
+e.clientY
+);
+
+renderBoard();
+
+}
+
+function moveDrag(e){
+
+e.preventDefault();
+
+if(!dragging)return;
+
+moveDragGhost(e.clientX,e.clientY);
+
+const cell=getCell(e.clientX,e.clientY);
+
+if(!cell)return;
+
+if(
+cell.r===selected.r &&
+cell.c===selected.c
+)return;
+
+if(!near(selected,cell))return;
+
+if(!moved){
+
+moved=true;
+
+startTimer();
+
+message.textContent="操作中…";
+
+}
+
+swap(selected,cell);
+
+selected=cell;
+
+renderBoard();
+
+}
+
+function endDrag(){
+
+if(!dragging)return;
+
+dragging=false;
+
+selected=null;
+
+stopTimer();
+
+removeDragGhost();
+
+renderBoard();
+
+if(!moved)return;
+
+resolveBoard();
+
+}
+
+function getMatches(){
+
+const mark={};
+
+for(let r=0;r<ROWS;r++){
+
+let count=1;
+
+for(let c=1;c<=COLS;c++){
+
+if(
+c<COLS &&
+board[r][c] &&
+board[r][c]===board[r][c-1]
+){
+count++;
+}else{
+
+if(count>=3){
+
+for(let k=0;k<count;k++){
+
+mark[
+r+","+(c-1-k)
+]=true;
+
+}
+
+}
+
+count=1;
+
+}
+
+}
+
+}
+
+for(let c=0;c<COLS;c++){
+
+let count=1;
+
+for(let r=1;r<=ROWS;r++){
+
+if(
+r<ROWS &&
+board[r][c] &&
+board[r][c]===board[r-1][c]
+){
+count++;
+}else{
+
+if(count>=3){
+
+for(let k=0;k<count;k++){
+
+mark[
+(r-1-k)+","+c
+]=true;
+
+}
+
+}
+
+count=1;
+
+}
+
+}
+
+}
+
+return mark;
+
+}
+
+function showComboEffect(combo){
+
+const e=document.createElement("div");
+
+e.className="combo-effect";
+
+e.textContent=combo+"コンボ！";
+
+document.body.appendChild(e);
+
+setTimeout(()=>{
+e.remove();
+},900);
+
+}
+
+function pop(target,text,cls){
+
+const d=document.createElement("div");
+
+d.className="float "+cls;
+
+d.textContent=text;
+
+target.appendChild(d);
+
+setTimeout(()=>{
+d.remove();
+},1600);
+
+}
+
+async function resolveBoard(){
+
+resolving=true;
+
+let combo=0;
+
+while(true){
+
+const matched=getMatches();
+
+const keys=Object.keys(matched);
+
+if(!keys.length)break;
+
+combo++;
+
+showComboEffect(combo);
+
+keys.forEach(key=>{
+
+const [r,c]=key.split(",").map(Number);
+
+board[r][c]=null;
+
+});
+
+renderBoard();
+
+await new Promise(r=>setTimeout(r,280));
+
+dropOrbs();
+
+renderBoard();
+
+await new Promise(r=>setTimeout(r,260));
+
+}
+
+if(combo>0){
+
+const damage=Math.floor(
+combo*800
+);
+
+enemyHp=Math.max(
+0,
+enemyHp-damage
+);
+
+pop(
+$("enemyIcon"),
+damage,
+"damage"
+);
+
+updateEnemyHp();
+
+message.textContent=
+combo+"コンボ！";
+
+if(enemyHp<=0){
+
+message.textContent=
+"撃破！";
+
+setTimeout(()=>{
+showResult();
+},1000);
+
+}else{
+
+playerHp=Math.max(
+0,
+playerHp-enemyAtk
+);
+
+pop(
+$("playerArea"),
+"-"+enemyAtk,
+"hurt"
+);
+
+updatePlayerHp();
+
+}
+
+}else{
+
+message.textContent=
+"コンボなし";
+
+}
+
+resolving=false;
+
+}
+
+function dropOrbs(){
+
+for(let c=0;c<COLS;c++){
+
+const remain=[];
+
+for(let r=ROWS-1;r>=0;r--){
+
+if(board[r][c]){
+
+remain.push(board[r][c]);
+
+}
+
+}
+
+while(remain.length<ROWS){
+
+remain.push(
+TYPES[
+Math.floor(Math.random()*TYPES.length)
+]
+);
+
+}
+
+for(let r=ROWS-1;r>=0;r--){
+
+board[r][c]=remain[ROWS-1-r];
+
+}
+
+}
+
 }
 
 function showResult(){
- const r=lastResult;
- $("resultSummary").innerHTML=
- `獲得ゴールド：+${r.money}<br>`+
- `獲得ガチャ石：+${r.stone}${r.first?"（初回クリアボーナス）":""}<br>`+
- `獲得キャラ：${r.drops.length}体`;
 
- const list=$("resultDrops");
- list.innerHTML="";
- if(r.drops.length===0){
-  const none=document.createElement("div");
-  none.className="drop-row";
-  none.textContent="なし";
-  list.appendChild(none);
- }else{
-  r.drops.forEach(d=>{
-   const row=document.createElement("div");
-   row.className="drop-row";
-   row.textContent=`★${d.rarity||1} No.${d.no} ${d.name||"キャラ"} / ${JP[d.attr]||d.attr}`;
-   list.appendChild(row);
-  });
- }
- showScreen("result");
+save.money+=1000;
+
+save.stone+=20;
+
+saveData();
+
+$("resultSummary").innerHTML=
+`
+獲得ゴールド：+1000<br>
+獲得ガチャ石：+20
+`;
+
+const list=$("resultDrops");
+
+list.innerHTML=
+`
+<div class="drop-row">
+★1 モリスライム
+</div>
+`;
+
+showScreen("result");
+
 }
 
 function retreatDungeon(){
- tempDrops=[];tempStone=0;
- message.textContent="撤退したため、仮獲得は全て没収";
- showScreen("dungeonMenu");
+
+showScreen("dungeonMenu");
+
 }
 
-function setEnemy(){const e=floors[floorIndex];enemyMaxHp=e.hp;enemyHp=e.hp;enemyAttr=e.attr;enemyAtk=e.atk;enemyTurnMax=e.turn;enemyTurn=e.turn;enemyName.textContent=e.name;enemyAttrText.textContent=JP[e.attr];enemyAtkText.textContent=e.atk;enemyIcon.className="enemy "+BG[e.attr];floorText.textContent=floorIndex+1;updateHp()}
-function updateHp(){enemyHpText.textContent=enemyHp;enemyMaxHpText.textContent=enemyMaxHp;enemyHpBar.style.width=(enemyHp/enemyMaxHp*100)+"%";playerHpText.textContent=playerHp;playerMaxHpText.textContent=playerMaxHp;playerHpBar.style.width=(playerHp/playerMaxHp*100)+"%";enemyTurnText.textContent=enemyTurn}
+function startDungeon(){
 
-boardEl.addEventListener("pointerdown",startDrag);
-window.addEventListener("pointermove",moveDrag);
-window.addEventListener("pointerup",endDrag);
-window.addEventListener("pointercancel",endDrag);
+enemyMaxHp=5000;
+
+enemyHp=5000;
+
+updateEnemyHp();
 
 renderParty();
+
+createBoard();
+
+showScreen("battle");
+
+}
+
+boardEl.addEventListener(
+"pointerdown",
+startDrag
+);
+
+window.addEventListener(
+"pointermove",
+moveDrag
+);
+
+window.addEventListener(
+"pointerup",
+endDrag
+);
+
+renderParty();
+
 updateHome();
 </script>
+
 </body>
 </html>
