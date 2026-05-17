@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="ja">
+<!DOCTYPE html><html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>パズルRPG</title>
-
-<style>
+<title>パズルRPG</title><style>
 *{
   margin:0;
   padding:0;
@@ -21,90 +18,210 @@ html,body{
 }
 
 body{
-  background:#111827;
+  background:#0f172a;
   color:white;
   font-family:sans-serif;
+  min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  min-height:100vh;
   overflow:hidden;
 }
 
 .game{
   width:100%;
   max-width:430px;
-  padding:14px;
+  height:100vh;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 
-.panel{
-  background:#1f2937;
-  border-radius:20px;
-  padding:16px;
-  margin-bottom:14px;
+.enemy-panel{
+  background:#111827;
+  border-radius:18px;
+  padding:10px;
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+.enemy-area{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
 }
 
 .enemy{
-  width:90px;
-  height:90px;
+  width:72px;
+  height:72px;
   border-radius:50%;
-  margin:auto;
-  background:radial-gradient(circle at 30% 30%, #ffb6d9, #9333ea);
-  box-shadow:0 0 20px #ff4fa3;
+  background:radial-gradient(circle at 30% 30%, #d9ffd1, #22c55e, #14532d);
+  box-shadow:0 0 18px rgba(34,197,94,0.7);
+  flex-shrink:0;
+}
+
+.enemy.hit{
+  animation:hit 0.18s;
+}
+
+@keyframes hit{
+  0%{transform:scale(1);filter:brightness(1);}
+  50%{transform:scale(0.88);filter:brightness(2);}
+  100%{transform:scale(1);filter:brightness(1);}
+}
+
+.enemy-info{
+  flex:1;
 }
 
 .enemy-name{
-  text-align:center;
-  font-size:30px;
-  margin-top:10px;
+  font-size:18px;
   font-weight:bold;
+  margin-bottom:5px;
+}
+
+.enemy-small{
+  font-size:13px;
+  color:#cbd5e1;
+  margin-bottom:6px;
 }
 
 .hp-wrap{
   width:100%;
-  height:18px;
-  background:#333;
+  height:15px;
+  background:#020617;
   border-radius:999px;
   overflow:hidden;
-  margin-top:16px;
 }
 
-.hp-bar{
-  width:100%;
+.enemy-hp-bar{
   height:100%;
-  background:linear-gradient(90deg,#22c55e,#d9ff3f);
-  transition:width 0.3s;
-}
-
-.info{
-  margin-top:10px;
-  display:flex;
-  justify-content:space-between;
-  font-size:21px;
+  width:100%;
+  background:linear-gradient(90deg,#22c55e,#bef264);
+  transition:width 0.25s;
 }
 
 .message{
-  background:#0f172a;
-  padding:15px;
-  border-radius:16px;
+  background:#020617;
+  border-radius:15px;
+  padding:10px;
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   text-align:center;
-  font-size:24px;
+  color:#fff3ad;
+  font-size:18px;
   font-weight:bold;
-  margin-bottom:14px;
-  color:#fff2b0;
+}
+
+.party{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:5px;
+}
+
+.member{
+  background:#1e293b;
+  border-radius:12px;
+  padding:4px 2px 5px;
+  text-align:center;
+  border:2px solid rgba(255,255,255,0.08);
+}
+
+.member .atk{
+  font-size:11px;
+  font-weight:bold;
+  color:#fde68a;
+  margin-bottom:2px;
+}
+
+.member .icon{
+  width:100%;
+  aspect-ratio:1;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  font-weight:bold;
+  margin-bottom:2px;
+}
+
+.member .name{
+  font-size:10px;
+  color:#e5e7eb;
+}
+
+.fire-bg{background:radial-gradient(circle at 30% 30%, #ffd4a8, #ef4444);}
+.water-bg{background:radial-gradient(circle at 30% 30%, #d7f1ff, #3b82f6);}
+.wood-bg{background:radial-gradient(circle at 30% 30%, #e4ffd8, #22c55e);}
+.light-bg{background:radial-gradient(circle at 30% 30%, #fffad1, #facc15);color:#111827;}
+.dark-bg{background:radial-gradient(circle at 30% 30%, #f5d0fe, #9333ea);}
+
+.player-hp-area{
+  background:#111827;
+  border-radius:14px;
+  padding:8px 10px;
+}
+
+.player-hp-text{
+  display:flex;
+  justify-content:space-between;
+  font-size:15px;
+  font-weight:bold;
+  margin-bottom:5px;
+}
+
+.player-hp-bar{
+  height:15px;
+  width:100%;
+  background:#020617;
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.player-hp-inner{
+  height:100%;
+  width:100%;
+  background:linear-gradient(90deg,#ef4444,#f97316,#facc15);
+  transition:width 0.25s;
+}
+
+.timer-row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  font-size:14px;
+  font-weight:bold;
+}
+
+.timer-bar-wrap{
+  flex:1;
+  height:10px;
+  background:#020617;
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.timer-bar{
+  height:100%;
+  width:100%;
+  background:#38bdf8;
 }
 
 .board-wrap{
   background:#1f2937;
-  padding:8px;
-  border-radius:24px;
+  padding:7px;
+  border-radius:20px;
   touch-action:none;
 }
 
 .board{
   display:grid;
   grid-template-columns:repeat(6,1fr);
-  gap:6px;
+  gap:5px;
 }
 
 .orb{
@@ -113,111 +230,84 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  font-size:34px;
+  font-size:29px;
   font-weight:bold;
   color:white;
   will-change:transform;
-  transition:transform 0.04s linear, box-shadow 0.04s linear;
+  transition:transform 0.035s linear, opacity 0.12s linear;
 }
 
 .selected{
-  transform:scale(1.06);
-  box-shadow:0 0 14px white;
+  transform:scale(1.03);
+  box-shadow:none;
+  outline:none;
   z-index:10;
 }
 
-.fire{
-  background:radial-gradient(circle at 30% 30%, #ffd4a8, #ef4444);
+.clear{
+  transform:scale(0.1);
+  opacity:0;
 }
 
-.water{
-  background:radial-gradient(circle at 30% 30%, #d7f1ff, #3b82f6);
-}
-
-.wood{
-  background:radial-gradient(circle at 30% 30%, #e4ffd8, #22c55e);
-}
-
-.light{
-  background:radial-gradient(circle at 30% 30%, #fffad1, #facc15);
-}
-
-.dark{
-  background:radial-gradient(circle at 30% 30%, #f5d0fe, #9333ea);
-}
-
-.heart{
-  background:radial-gradient(circle at 30% 30%, #ffe4f0, #ec4899);
-}
+.fire{background:radial-gradient(circle at 30% 30%, #ffd4a8, #ef4444);}
+.water{background:radial-gradient(circle at 30% 30%, #d7f1ff, #3b82f6);}
+.wood{background:radial-gradient(circle at 30% 30%, #e4ffd8, #22c55e);}
+.light{background:radial-gradient(circle at 30% 30%, #fffad1, #facc15);color:#111827;}
+.dark{background:radial-gradient(circle at 30% 30%, #f5d0fe, #9333ea);}
+.heart{background:radial-gradient(circle at 30% 30%, #ffe4f0, #ec4899);}
 
 .buttons{
   display:flex;
-  gap:10px;
-  margin-top:14px;
+  gap:8px;
 }
 
 button{
   flex:1;
   border:none;
-  border-radius:18px;
-  padding:18px;
-  font-size:24px;
+  border-radius:14px;
+  padding:11px;
+  font-size:17px;
   font-weight:bold;
   background:#eef2ff;
   color:#111827;
 }
-</style>
-</head>
-
-<body>
-
-<div class="game">
-
-  <div class="panel">
-    <div class="enemy"></div>
-
-    <div class="enemy-name">
-      まじっくスライム
+</style></head><body>
+<div class="game">  <div class="enemy-panel">
+    <div class="enemy-area">
+      <div class="enemy" id="enemyIcon"></div>
+      <div class="enemy-info">
+        <div class="enemy-name">モリスライム</div>
+        <div class="enemy-small">属性：木 / 攻撃：850 / 攻撃まで：<span id="enemyTurnText">1</span></div>
+        <div class="hp-wrap">
+          <div class="enemy-hp-bar" id="enemyHpBar"></div>
+        </div>
+        <div class="enemy-small">敵HP：<span id="enemyHpText">5000</span></div>
+      </div>
     </div>
-
-    <div class="hp-wrap">
-      <div class="hp-bar" id="hpBar"></div>
+  </div>  <div class="message" id="message">ドロップを動かすと5秒カウント開始</div>  <div class="party" id="party"></div>  <div class="player-hp-area">
+    <div class="player-hp-text">
+      <span>味方HP</span>
+      <span><span id="playerHpText">5550</span> / <span id="playerMaxHpText">5550</span></span>
     </div>
-
-    <div class="info">
-      <div>HP : <span id="hpText">3000</span></div>
-      <div>コンボ : <span id="comboText">0</span></div>
+    <div class="player-hp-bar">
+      <div class="player-hp-inner" id="playerHpBar"></div>
     </div>
-  </div>
-
-  <div class="message" id="message">
-    指でドロップを動かそう
-  </div>
-
-  <div class="board-wrap">
+  </div>  <div class="timer-row">
+    <span>操作時間 <span id="timerText">5.0</span>秒</span>
+    <div class="timer-bar-wrap">
+      <div class="timer-bar" id="timerBar"></div>
+    </div>
+  </div>  <div class="board-wrap">
     <div class="board" id="board"></div>
-  </div>
-
-  <div class="buttons">
+  </div>  <div class="buttons">
     <button onclick="resetGame()">リセット</button>
     <button onclick="healEnemy()">敵復活</button>
-  </div>
-
-</div>
-
-<script>
+  </div></div><script>
 const ROWS = 5;
 const COLS = 6;
+const MOVE_TIME = 5;
 
-const TYPES = [
-  "fire",
-  "water",
-  "wood",
-  "light",
-  "dark",
-  "heart"
-];
-
+const TYPES = ["fire","water","wood","light","dark","heart"];
 const ICONS = {
   fire:"火",
   water:"水",
@@ -226,54 +316,114 @@ const ICONS = {
   dark:"闇",
   heart:"♡"
 };
+const JP = {
+  fire:"火",
+  water:"水",
+  wood:"木",
+  light:"光",
+  dark:"闇",
+  heart:"回復"
+};
+const BG = {
+  fire:"fire-bg",
+  water:"water-bg",
+  wood:"wood-bg",
+  light:"light-bg",
+  dark:"dark-bg"
+};
+
+const members = [
+  {no:1, attr:"fire", hp:500, atk:150, rcv:15},
+  {no:2, attr:"water", hp:1500, atk:50, rcv:45},
+  {no:3, attr:"wood", hp:1000, atk:100, rcv:30},
+  {no:4, attr:"dark", hp:750, atk:180, rcv:0},
+  {no:5, attr:"light", hp:1200, atk:100, rcv:50},
+  {no:6, attr:"fire", hp:600, atk:130, rcv:25}
+];
 
 let board = [];
 let dragging = false;
+let resolving = false;
 let selected = null;
-let enemyHp = 3000;
+let playerMaxHp = members.reduce((sum,m)=>sum+m.hp,0);
+let playerHp = playerMaxHp;
+let totalRcv = members.reduce((sum,m)=>sum+m.rcv,0);
+let enemyMaxHp = 5000;
+let enemyHp = enemyMaxHp;
+let enemyAttr = "wood";
+let enemyAtk = 850;
+let enemyTurn = 1;
+let timerId = null;
+let timeLeft = MOVE_TIME;
+let moveStartTime = 0;
 
 const boardEl = document.getElementById("board");
-const hpBar = document.getElementById("hpBar");
-const hpText = document.getElementById("hpText");
-const comboText = document.getElementById("comboText");
+const partyEl = document.getElementById("party");
 const message = document.getElementById("message");
+const enemyHpBar = document.getElementById("enemyHpBar");
+const enemyHpText = document.getElementById("enemyHpText");
+const enemyTurnText = document.getElementById("enemyTurnText");
+const enemyIcon = document.getElementById("enemyIcon");
+const playerHpText = document.getElementById("playerHpText");
+const playerMaxHpText = document.getElementById("playerMaxHpText");
+const playerHpBar = document.getElementById("playerHpBar");
+const timerText = document.getElementById("timerText");
+const timerBar = document.getElementById("timerBar");
 
 function randomType(){
-  return TYPES[Math.floor(Math.random() * TYPES.length)];
+  return TYPES[Math.floor(Math.random()*TYPES.length)];
+}
+
+function sleep(ms){
+  return new Promise(resolve=>setTimeout(resolve,ms));
+}
+
+function renderParty(){
+  partyEl.innerHTML = "";
+  for(const m of members){
+    const div = document.createElement("div");
+    div.className = "member";
+    div.innerHTML = `
+      <div class="atk">攻 ${m.atk}</div>
+      <div class="icon ${BG[m.attr]}">${JP[m.attr]}</div>
+      <div class="name">No.${m.no}</div>
+    `;
+    partyEl.appendChild(div);
+  }
 }
 
 function createBoard(){
   board = [];
-
-  for(let r = 0; r < ROWS; r++){
-    let row = [];
-
-    for(let c = 0; c < COLS; c++){
+  for(let r=0;r<ROWS;r++){
+    const row = [];
+    for(let c=0;c<COLS;c++){
       row.push(randomType());
     }
-
     board.push(row);
   }
-
+  while(getComboGroups().length > 0){
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        board[r][c] = randomType();
+      }
+    }
+  }
   renderBoard();
 }
 
 function renderBoard(){
   boardEl.innerHTML = "";
-
-  for(let r = 0; r < ROWS; r++){
-    for(let c = 0; c < COLS; c++){
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const type = board[r][c];
       const orb = document.createElement("div");
-
-      orb.className = "orb " + board[r][c];
-      orb.innerText = ICONS[board[r][c]];
-      orb.dataset.row = r;
-      orb.dataset.col = c;
-
+      orb.className = "orb " + type;
+      orb.innerText = ICONS[type];
+      orb.dataset.r = r;
+      orb.dataset.c = c;
       if(selected && selected.r === r && selected.c === c){
         orb.classList.add("selected");
       }
-
       boardEl.appendChild(orb);
     }
   }
@@ -281,163 +431,349 @@ function renderBoard(){
 
 function getCell(x,y){
   const rect = boardEl.getBoundingClientRect();
-
-  const cellWidth = rect.width / COLS;
-  const cellHeight = rect.height / ROWS;
-
-  const c = Math.floor((x - rect.left) / cellWidth);
-  const r = Math.floor((y - rect.top) / cellHeight);
-
-  if(r < 0 || c < 0 || r >= ROWS || c >= COLS){
-    return null;
-  }
-
+  const cellW = rect.width / COLS;
+  const cellH = rect.height / ROWS;
+  const c = Math.floor((x - rect.left) / cellW);
+  const r = Math.floor((y - rect.top) / cellH);
+  if(r<0 || c<0 || r>=ROWS || c>=COLS) return null;
   return {r,c};
 }
 
 function swap(a,b){
-  const temp = board[a.r][a.c];
-
+  const t = board[a.r][a.c];
   board[a.r][a.c] = board[b.r][b.c];
-  board[b.r][b.c] = temp;
+  board[b.r][b.c] = t;
 }
 
 function isNear(a,b){
-  return Math.abs(a.r - b.r) + Math.abs(a.c - b.c) === 1;
+  return Math.abs(a.r-b.r) + Math.abs(a.c-b.c) === 1;
+}
+
+function startTimer(){
+  stopTimer();
+  timeLeft = MOVE_TIME;
+  moveStartTime = performance.now();
+  updateTimerView();
+  timerId = setInterval(()=>{
+    const passed = (performance.now() - moveStartTime) / 1000;
+    timeLeft = Math.max(0, MOVE_TIME - passed);
+    updateTimerView();
+    if(timeLeft <= 0){
+      endDrag();
+    }
+  },50);
+}
+
+function stopTimer(){
+  if(timerId){
+    clearInterval(timerId);
+    timerId = null;
+  }
+}
+
+function updateTimerView(){
+  timerText.innerText = timeLeft.toFixed(1);
+  timerBar.style.width = (timeLeft / MOVE_TIME * 100) + "%";
 }
 
 function startDrag(e){
   e.preventDefault();
-
+  if(resolving || playerHp <= 0 || enemyHp <= 0) return;
+  const cell = getCell(e.clientX,e.clientY);
+  if(!cell) return;
   dragging = true;
-
-  const cell = getCell(e.clientX, e.clientY);
-
-  if(!cell){
-    return;
-  }
-
   selected = cell;
+  message.innerText = "操作中… 指を離すか5秒で終了";
+  startTimer();
   renderBoard();
 }
 
 function moveDrag(e){
   e.preventDefault();
-
-  if(!dragging || !selected){
-    return;
-  }
-
-  const cell = getCell(e.clientX, e.clientY);
-
-  if(!cell){
-    return;
-  }
-
-  if(isNear(selected, cell)){
-    swap(selected, cell);
+  if(!dragging || !selected || resolving) return;
+  const cell = getCell(e.clientX,e.clientY);
+  if(!cell) return;
+  if(isNear(selected,cell)){
+    swap(selected,cell);
     selected = cell;
     renderBoard();
   }
 }
 
 function endDrag(e){
-  if(e){
-    e.preventDefault();
-  }
-
-  if(!dragging){
-    return;
-  }
-
+  if(e) e.preventDefault();
+  if(!dragging) return;
   dragging = false;
+  stopTimer();
   selected = null;
-
   renderBoard();
-  checkMatches();
+  resolveBoard();
 }
 
-function checkMatches(){
-  let removeMap = {};
+function getMatchedCells(){
+  const map = {};
 
-  for(let r = 0; r < ROWS; r++){
-    for(let c = 0; c < COLS - 2; c++){
-      const t = board[r][c];
-
-      if(t === board[r][c + 1] && t === board[r][c + 2]){
-        removeMap[r + "," + c] = true;
-        removeMap[r + "," + (c + 1)] = true;
-        removeMap[r + "," + (c + 2)] = true;
+  for(let r=0;r<ROWS;r++){
+    let count = 1;
+    for(let c=1;c<=COLS;c++){
+      if(c<COLS && board[r][c] && board[r][c] === board[r][c-1]){
+        count++;
+      }else{
+        if(count >= 3){
+          for(let k=0;k<count;k++){
+            map[r + "," + (c-1-k)] = true;
+          }
+        }
+        count = 1;
       }
     }
   }
 
-  for(let c = 0; c < COLS; c++){
-    for(let r = 0; r < ROWS - 2; r++){
-      const t = board[r][c];
-
-      if(t === board[r + 1][c] && t === board[r + 2][c]){
-        removeMap[r + "," + c] = true;
-        removeMap[(r + 1) + "," + c] = true;
-        removeMap[(r + 2) + "," + c] = true;
+  for(let c=0;c<COLS;c++){
+    let count = 1;
+    for(let r=1;r<=ROWS;r++){
+      if(r<ROWS && board[r][c] && board[r][c] === board[r-1][c]){
+        count++;
+      }else{
+        if(count >= 3){
+          for(let k=0;k<count;k++){
+            map[(r-1-k) + "," + c] = true;
+          }
+        }
+        count = 1;
       }
     }
   }
 
-  const removeList = Object.keys(removeMap);
+  return map;
+}
 
-  if(removeList.length === 0){
-    comboText.innerText = "0";
+function getComboGroups(){
+  const matched = getMatchedCells();
+  const visited = {};
+  const groups = [];
+  const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+
+  for(const key of Object.keys(matched)){
+    if(visited[key]) continue;
+
+    const [sr,sc] = key.split(",").map(Number);
+    const type = board[sr][sc];
+    const stack = [{r:sr,c:sc}];
+    const cells = [];
+    visited[key] = true;
+
+    while(stack.length){
+      const cur = stack.pop();
+      cells.push(cur);
+
+      for(const [dr,dc] of dirs){
+        const nr = cur.r + dr;
+        const nc = cur.c + dc;
+        const nk = nr + "," + nc;
+        if(nr<0 || nc<0 || nr>=ROWS || nc>=COLS) continue;
+        if(!matched[nk] || visited[nk]) continue;
+        if(board[nr][nc] !== type) continue;
+        visited[nk] = true;
+        stack.push({r:nr,c:nc});
+      }
+    }
+
+    groups.push({type,cells,count:cells.length});
+  }
+
+  return groups;
+}
+
+async function resolveBoard(){
+  resolving = true;
+
+  let combo = 0;
+  const clearedGroups = [];
+
+  while(true){
+    const groups = getComboGroups();
+    if(groups.length === 0) break;
+
+    for(const group of groups){
+      combo++;
+      clearedGroups.push({...group, combo});
+      message.innerText = combo + "コンボ！ " + JP[group.type] + "を" + group.count + "個消した！";
+      markClear(group.cells);
+      await sleep(260);
+      for(const cell of group.cells){
+        board[cell.r][cell.c] = null;
+      }
+      renderBoard();
+      await sleep(100);
+    }
+
+    dropOrbs();
+    renderBoard();
+    await sleep(300);
+  }
+
+  if(combo === 0){
     message.innerText = "コンボなし";
+    enemyAttackIfNeeded();
+    resolving = false;
     return;
   }
 
-  const combo = Math.max(1, Math.floor(removeList.length / 3));
-  const damage = combo * 300;
+  const result = calculateResult(clearedGroups, combo);
+  applyDamageAndHeal(result, combo);
+  await sleep(500);
+  if(enemyHp > 0 && playerHp > 0){
+    enemyAttackIfNeeded();
+  }
+  resolving = false;
+}
 
-  enemyHp -= damage;
+function markClear(cells){
+  const orbs = [...boardEl.children];
+  for(const cell of cells){
+    const index = cell.r * COLS + cell.c;
+    if(orbs[index]) orbs[index].classList.add("clear");
+  }
+}
 
-  if(enemyHp < 0){
-    enemyHp = 0;
+function dropOrbs(){
+  for(let c=0;c<COLS;c++){
+    const remain = [];
+    for(let r=ROWS-1;r>=0;r--){
+      if(board[r][c]) remain.push(board[r][c]);
+    }
+    while(remain.length < ROWS){
+      remain.push(randomType());
+    }
+    for(let r=ROWS-1;r>=0;r--){
+      board[r][c] = remain[ROWS-1-r];
+    }
+  }
+}
+
+function comboMultiplier(combo){
+  return 1 + (combo - 1) * 0.25;
+}
+
+function orbCountMultiplier(count){
+  return 1 + (count - 3) * 0.25;
+}
+
+function leaderMultiplier(combo){
+  let m = 1;
+  if(combo >= 5) m *= 3;
+  else if(combo >= 4) m *= 2;
+  if(combo >= 7) m *= 5;
+  return m;
+}
+
+function attrRate(attacker, defender){
+  if(attacker === "fire" && defender === "wood") return 2;
+  if(attacker === "fire" && defender === "water") return 0.5;
+  if(attacker === "water" && defender === "fire") return 2;
+  if(attacker === "water" && defender === "wood") return 0.5;
+  if(attacker === "wood" && defender === "water") return 2;
+  if(attacker === "wood" && defender === "fire") return 0.5;
+  if(attacker === "light" && defender === "dark") return 2;
+  if(attacker === "dark" && defender === "light") return 2;
+  return 1;
+}
+
+function calculateResult(groups, combo){
+  const cMul = comboMultiplier(combo);
+  const lMul = leaderMultiplier(combo);
+  let totalDamage = 0;
+  let totalHeal = 0;
+
+  for(const group of groups){
+    const oMul = orbCountMultiplier(group.count);
+
+    if(group.type === "heart"){
+      totalHeal += Math.floor(totalRcv * oMul * cMul);
+      continue;
+    }
+
+    const attackers = members.filter(m=>m.attr === group.type);
+    for(const m of attackers){
+      const rate = attrRate(m.attr, enemyAttr);
+      const dmg = Math.floor(m.atk * oMul * cMul * lMul * rate);
+      totalDamage += dmg;
+    }
   }
 
-  hpText.innerText = enemyHp;
-  hpBar.style.width = (enemyHp / 3000 * 100) + "%";
-  comboText.innerText = combo;
+  return {totalDamage,totalHeal,cMul,lMul};
+}
 
-  message.innerText = combo + "コンボ！ " + damage + "ダメージ！";
-
-  for(const key of removeList){
-    const parts = key.split(",");
-    const r = Number(parts[0]);
-    const c = Number(parts[1]);
-
-    board[r][c] = randomType();
+function applyDamageAndHeal(result, combo){
+  if(result.totalHeal > 0){
+    playerHp = Math.min(playerMaxHp, playerHp + result.totalHeal);
   }
 
-  renderBoard();
+  if(result.totalDamage > 0){
+    enemyHp = Math.max(0, enemyHp - result.totalDamage);
+    enemyIcon.classList.add("hit");
+    setTimeout(()=>enemyIcon.classList.remove("hit"),180);
+  }
+
+  updateHpViews();
 
   if(enemyHp <= 0){
-    message.innerText = "敵を倒した！";
+    message.innerText = combo + "コンボ！ " + result.totalDamage + "ダメージ！ 敵を倒した！";
+  }else{
+    let text = combo + "コンボ！ " + result.totalDamage + "ダメージ！";
+    if(result.totalHeal > 0) text += " HP" + result.totalHeal + "回復！";
+    if(result.lMul > 1) text += " LS" + result.lMul + "倍！";
+    message.innerText = text;
   }
+}
+
+function enemyAttackIfNeeded(){
+  if(enemyHp <= 0 || playerHp <= 0) return;
+
+  enemyTurn--;
+  if(enemyTurn <= 0){
+    playerHp = Math.max(0, playerHp - enemyAtk);
+    enemyTurn = 1;
+    updateHpViews();
+    if(playerHp <= 0){
+      message.innerText = "敵の攻撃！ " + enemyAtk + "ダメージ… ゲームオーバー";
+    }else{
+      message.innerText += " / 敵の攻撃！" + enemyAtk + "ダメージ";
+    }
+  }
+  enemyTurnText.innerText = enemyTurn;
+}
+
+function updateHpViews(){
+  enemyHpText.innerText = enemyHp;
+  enemyHpBar.style.width = (enemyHp / enemyMaxHp * 100) + "%";
+
+  playerHpText.innerText = playerHp;
+  playerMaxHpText.innerText = playerMaxHp;
+  playerHpBar.style.width = (playerHp / playerMaxHp * 100) + "%";
+  enemyTurnText.innerText = enemyTurn;
 }
 
 function resetGame(){
-  enemyHp = 3000;
-
-  hpText.innerText = enemyHp;
-  hpBar.style.width = "100%";
-  comboText.innerText = "0";
-  message.innerText = "指でドロップを動かそう";
-
+  stopTimer();
+  dragging = false;
+  resolving = false;
+  selected = null;
+  playerHp = playerMaxHp;
+  enemyHp = enemyMaxHp;
+  enemyTurn = 1;
+  timeLeft = MOVE_TIME;
+  updateTimerView();
+  updateHpViews();
+  message.innerText = "ドロップを動かすと5秒カウント開始";
   createBoard();
 }
 
 function healEnemy(){
-  enemyHp = 3000;
-
-  hpText.innerText = enemyHp;
-  hpBar.style.width = "100%";
+  enemyHp = enemyMaxHp;
+  enemyTurn = 1;
+  updateHpViews();
   message.innerText = "敵が復活した！";
 }
 
@@ -446,8 +782,7 @@ window.addEventListener("pointermove", moveDrag);
 window.addEventListener("pointerup", endDrag);
 window.addEventListener("pointercancel", endDrag);
 
+renderParty();
 resetGame();
-</script>
-
-</body>
+</script></body>
 </html>
