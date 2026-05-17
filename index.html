@@ -36,11 +36,12 @@ body{display:flex;justify-content:center}
 .timer{display:flex;gap:6px;align-items:center;font-size:13px;font-weight:bold}
 .timer-wrap{flex:1;height:9px;background:#020617;border-radius:999px;overflow:hidden}
 .timer-bar{height:100%;width:100%;background:#38bdf8}
-.board-wrap{background:#1f2937;border-radius:18px;padding:6px;flex:1;display:flex}
-.board{width:100%;display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
-.orb{aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(22px,8vw,34px);font-weight:bold;transition:transform .03s,opacity .12s}
-.selected{transform:scale(1.02)}
-.clear{opacity:0;transform:scale(.1)}
+.board-wrap{background:#1f2937;border-radius:18px;padding:6px;flex:1;display:flex;position:relative;overflow:hidden}
+.board{width:100%;height:100%;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(5,1fr);gap:4px}
+.orb{border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(22px,8vw,34px);font-weight:bold;transition:transform .08s ease,opacity .08s ease}
+.orb.held{opacity:.2;transform:scale(.9)}
+.orb.clear{opacity:0;transform:scale(.1)}
+.drag-orb{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(24px,9vw,38px);font-weight:bold;pointer-events:none;z-index:100;transform:translate(-50%,-50%) scale(1.08);box-shadow:0 8px 20px rgba(0,0,0,.45);opacity:.98}
 .buttons{display:flex;gap:6px}
 button{flex:1;border:0;border-radius:12px;padding:8px;font-size:14px;font-weight:bold;background:#eef2ff;color:#111827}
 .status{font-size:11px;color:#cbd5e1;line-height:1.35;background:#020617;border-radius:10px;padding:6px}
@@ -72,7 +73,6 @@ button{flex:1;border:0;border-radius:12px;padding:8px;font-size:14px;font-weight
 </div>
 
 <div class="message" id="message">ドロップを動かしたら5秒開始</div>
-
 <div class="party" id="party"></div>
 
 <div class="player" id="playerArea">
@@ -88,7 +88,7 @@ button{flex:1;border:0;border-radius:12px;padding:8px;font-size:14px;font-weight
   <div class="timer-wrap"><div class="timer-bar" id="timerBar"></div></div>
 </div>
 
-<div class="board-wrap">
+<div class="board-wrap" id="boardWrap">
   <div class="board" id="board"></div>
 </div>
 
@@ -120,14 +120,8 @@ const members=[
 const dungeon={
  id:"forest_001",
  name:"はじまりの森",
- difficulty:"初級",
  firstGacha:20,
- reward:{
-  money:[500,1000],
-  enhance:[1,3],
-  skill:[0,1],
-  awaken:[0,0]
- },
+ reward:{money:[500,1000],enhance:[1,3],skill:[0,1],awaken:[0,0]},
  floors:[
   {name:"モリスライム",attr:"wood",hp:5000,atk:850,turn:1,dropRate:.5,gachaRate:.35,drop:{id:101,name:"モリスライム",attr:"wood"}},
   {name:"アクアゴブリン",attr:"water",hp:6500,atk:950,turn:2,dropRate:.4,gachaRate:.35,drop:{id:102,name:"アクアゴブリン",attr:"water"}},
@@ -144,12 +138,12 @@ let save=JSON.parse(localStorage.getItem("puzzleRpgSave")||"null")||{
  cleared:{}
 };
 
-let board=[],dragging=false,movedOnce=false,resolving=false,selected=null,timerId=null;
+let board=[],dragging=false,movedOnce=false,resolving=false,selected=null,timerId=null,dragGhost=null,heldType=null;
 let playerMaxHp=members.reduce((s,m)=>s+m.hp,0),playerHp=playerMaxHp,totalRcv=members.reduce((s,m)=>s+m.rcv,0);
 let floorIndex=0,enemyHp=0,enemyMaxHp=0,enemyAttr="",enemyAtk=0,enemyTurn=1,enemyTurnMax=1;
 let tempDrops=[],tempGacha=0;
 
-const boardEl=document.getElementById("board"),partyEl=document.getElementById("party"),message=document.getElementById("message");
+const boardEl=document.getElementById("board"),boardWrap=document.getElementById("boardWrap"),partyEl=document.getElementById("party"),message=document.getElementById("message");
 const enemyIcon=document.getElementById("enemyIcon"),enemyName=document.getElementById("enemyName"),enemyHpBar=document.getElementById("enemyHpBar");
 const enemyHpText=document.getElementById("enemyHpText"),enemyMaxHpText=document.getElementById("enemyMaxHpText"),enemyAttrText=document.getElementById("enemyAttrText");
 const enemyAtkText=document.getElementById("enemyAtkText"),enemyTurnText=document.getElementById("enemyTurnText"),floorText=document.getElementById("floorText");
@@ -196,7 +190,7 @@ function renderBoard(){
    const o=document.createElement("div");
    o.className="orb "+board[r][c];
    o.textContent=ICONS[board[r][c]];
-   if(selected&&selected.r===r&&selected.c===c)o.classList.add("selected");
+   if(selected&&selected.r===r&&selected.c===c&&dragging)o.classList.add("held");
    boardEl.appendChild(o);
   }
  }
@@ -208,7 +202,41 @@ function getCell(x,y){
  if(r<0||c<0||r>=ROWS||c>=COLS)return null;
  return{r,c};
 }
-function swap(a,b){const t=board[a.r][a.c];board[a.r][a.c]=board[b.r][b.c];board[b.r][b.c]=t}
+
+function getCellSize(){
+ const rect=boardEl.getBoundingClientRect();
+ const gap=4;
+ return {w:rect.width/COLS-gap,h:rect.height/ROWS-gap};
+}
+
+function createDragGhost(type,x,y){
+ removeDragGhost();
+ const size=getCellSize();
+ dragGhost=document.createElement("div");
+ dragGhost.className="drag-orb "+type;
+ dragGhost.textContent=ICONS[type];
+ dragGhost.style.width=size.w+"px";
+ dragGhost.style.height=size.h+"px";
+ boardWrap.appendChild(dragGhost);
+ moveDragGhost(x,y);
+}
+
+function moveDragGhost(x,y){
+ if(!dragGhost)return;
+ const rect=boardWrap.getBoundingClientRect();
+ dragGhost.style.left=(x-rect.left)+"px";
+ dragGhost.style.top=(y-rect.top)+"px";
+}
+
+function removeDragGhost(){
+ if(dragGhost){dragGhost.remove();dragGhost=null}
+}
+
+function swap(a,b){
+ const t=board[a.r][a.c];
+ board[a.r][a.c]=board[b.r][b.c];
+ board[b.r][b.c]=t;
+}
 function isNear(a,b){return Math.abs(a.r-b.r)+Math.abs(a.c-b.c)===1}
 
 function startTimer(){
@@ -228,7 +256,8 @@ function startDrag(e){
  if(resolving||playerHp<=0||enemyHp<=0)return;
  const cell=getCell(e.clientX,e.clientY);
  if(!cell)return;
- dragging=true;movedOnce=false;selected=cell;
+ dragging=true;movedOnce=false;selected=cell;heldType=board[cell.r][cell.c];
+ createDragGhost(heldType,e.clientX,e.clientY);
  renderBoard();
 }
 
@@ -245,11 +274,15 @@ function moveOneStep(next){
 function moveDrag(e){
  e.preventDefault();
  if(!dragging||!selected||resolving)return;
+ moveDragGhost(e.clientX,e.clientY);
+
  const cell=getCell(e.clientX,e.clientY);
  if(!cell||(cell.r===selected.r&&cell.c===selected.c))return;
+
  const dr=cell.r-selected.r,dc=cell.c-selected.c;
  const sr=Math.sign(dr),sc=Math.sign(dc);
  let changed=false;
+
  if(Math.abs(dc)>=Math.abs(dr)){
   if(sc)changed=moveOneStep({r:selected.r,c:selected.c+sc})||changed;
   if(sr)changed=moveOneStep({r:selected.r+sr,c:selected.c})||changed;
@@ -257,13 +290,19 @@ function moveDrag(e){
   if(sr)changed=moveOneStep({r:selected.r+sr,c:selected.c})||changed;
   if(sc)changed=moveOneStep({r:selected.r,c:selected.c+sc})||changed;
  }
+
  if(changed)renderBoard();
 }
 
 function endDrag(e){
  if(e)e.preventDefault();
  if(!dragging)return;
- dragging=false;selected=null;stopTimer();renderBoard();
+ dragging=false;
+ selected=null;
+ heldType=null;
+ stopTimer();
+ removeDragGhost();
+ renderBoard();
  if(!movedOnce)return;
  resolveBoard();
 }
@@ -467,7 +506,8 @@ function updateHp(){
 }
 
 function resetDungeon(){
- stopTimer();dragging=false;movedOnce=false;resolving=false;selected=null;
+ stopTimer();removeDragGhost();
+ dragging=false;movedOnce=false;resolving=false;selected=null;heldType=null;
  floorIndex=0;playerHp=playerMaxHp;tempDrops=[];tempGacha=0;
  timerText.textContent="5.0";timerBar.style.width="100%";
  setEnemy();createBoard();updateStatus();
