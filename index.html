@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="ja">
+<!DOCTYPE html><html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>パズルRPG</title>
-
-<style>
+<title>パズルRPG</title><style>
 *{
   margin:0;
   padding:0;
@@ -18,38 +15,42 @@
 html,body{
   width:100%;
   height:100%;
-  overflow:hidden;
-  background:#0f172a;
-  font-family:sans-serif;
-  color:white;
+  overscroll-behavior:none;
   touch-action:none;
 }
 
 body{
-  display:flex;
-  justify-content:center;
+  background:#0f172a;
+  color:white;
+  font-family:sans-serif;
+  overflow:hidden;
 }
 
 .game{
   width:100%;
   max-width:430px;
   height:100svh;
+  max-height:100svh;
+  margin:0 auto;
   padding:7px;
   display:flex;
   flex-direction:column;
   gap:6px;
+  overflow:hidden;
 }
 
 .enemy-panel{
   background:#111827;
   border-radius:15px;
   padding:8px;
+  border:1px solid rgba(255,255,255,0.08);
+  flex-shrink:0;
 }
 
 .enemy-area{
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:9px;
 }
 
 .enemy{
@@ -60,29 +61,59 @@ body{
   position:relative;
 }
 
+.enemy.fire-bg{box-shadow:0 0 16px rgba(239,68,68,0.65);}
+.enemy.water-bg{box-shadow:0 0 16px rgba(59,130,246,0.65);}
+.enemy.wood-bg{box-shadow:0 0 16px rgba(34,197,94,0.65);}
+.enemy.light-bg{box-shadow:0 0 16px rgba(250,204,21,0.65);}
+.enemy.dark-bg{box-shadow:0 0 16px rgba(147,51,234,0.65);}
+
 .enemy.hit{
-  animation:enemyHit 0.18s;
+  animation:hit 0.18s;
 }
 
-@keyframes enemyHit{
-  0%{transform:scale(1);}
-  50%{transform:scale(0.84);filter:brightness(2);}
-  100%{transform:scale(1);}
+.player-hp-area.hit{
+  animation:playerHit 0.22s;
 }
 
-.enemy-name{
-  font-size:18px;
-  font-weight:bold;
+.player-hp-area.heal{
+  animation:playerHeal 0.25s;
+}
+
+@keyframes playerHit{
+  0%{filter:brightness(1);transform:translateX(0);}
+  30%{filter:brightness(1.8);transform:translateX(-4px);}
+  60%{transform:translateX(4px);}
+  100%{filter:brightness(1);transform:translateX(0);}
+}
+
+@keyframes playerHeal{
+  0%{filter:brightness(1);}
+  50%{filter:brightness(1.8);}
+  100%{filter:brightness(1);}
+}
+
+@keyframes hit{
+  0%{transform:scale(1);filter:brightness(1);}
+  50%{transform:scale(0.85);filter:brightness(2);}
+  100%{transform:scale(1);filter:brightness(1);}
 }
 
 .enemy-info{
   flex:1;
+  min-width:0;
+}
+
+.enemy-name{
+  font-size:19px;
+  font-weight:bold;
+  margin-bottom:2px;
+  white-space:nowrap;
 }
 
 .enemy-small{
   font-size:12px;
   color:#cbd5e1;
-  margin-top:2px;
+  margin-bottom:4px;
 }
 
 .hp-wrap{
@@ -91,47 +122,53 @@ body{
   background:#020617;
   border-radius:999px;
   overflow:hidden;
-  margin-top:4px;
 }
 
 .enemy-hp-bar{
-  width:100%;
   height:100%;
+  width:100%;
   background:linear-gradient(90deg,#22c55e,#bef264);
-  transition:0.25s;
+  transition:width 0.25s;
 }
 
 .message{
   background:#020617;
-  border-radius:12px;
+  border-radius:13px;
+  padding:7px 8px;
   min-height:36px;
   display:flex;
   align-items:center;
   justify-content:center;
   text-align:center;
   color:#fff3ad;
-  font-size:16px;
+  font-size:17px;
   font-weight:bold;
-  padding:7px;
+  line-height:1.25;
+  flex-shrink:0;
+  position:relative;
 }
 
 .party{
   display:grid;
   grid-template-columns:repeat(6,1fr);
   gap:4px;
+  flex-shrink:0;
 }
 
 .member{
   background:#1e293b;
   border-radius:10px;
-  padding:3px;
+  padding:3px 2px 4px;
   text-align:center;
+  border:2px solid rgba(255,255,255,0.08);
+  min-width:0;
 }
 
 .member .atk{
   font-size:10px;
-  color:#fde68a;
   font-weight:bold;
+  color:#fde68a;
+  margin-bottom:1px;
 }
 
 .member .icon{
@@ -143,40 +180,26 @@ body{
   justify-content:center;
   font-size:17px;
   font-weight:bold;
-  margin-top:2px;
+  margin-bottom:1px;
 }
 
 .member .name{
   font-size:9px;
-  margin-top:2px;
+  color:#e5e7eb;
 }
+
+.fire-bg{background:radial-gradient(circle at 30% 30%, #ffd4a8, #ef4444);}
+.water-bg{background:radial-gradient(circle at 30% 30%, #d7f1ff, #3b82f6);}
+.wood-bg{background:radial-gradient(circle at 30% 30%, #e4ffd8, #22c55e);}
+.light-bg{background:radial-gradient(circle at 30% 30%, #fffad1, #facc15);color:#111827;}
+.dark-bg{background:radial-gradient(circle at 30% 30%, #f5d0fe, #9333ea);}
 
 .player-hp-area{
   background:#111827;
-  border-radius:12px;
-  padding:7px;
   position:relative;
-}
-
-.player-hp-area.hit{
-  animation:playerHit 0.25s;
-}
-
-.player-hp-area.heal{
-  animation:playerHeal 0.25s;
-}
-
-@keyframes playerHit{
-  0%{transform:translateX(0);}
-  25%{transform:translateX(-4px);}
-  50%{transform:translateX(4px);}
-  100%{transform:translateX(0);}
-}
-
-@keyframes playerHeal{
-  0%{filter:brightness(1);}
-  50%{filter:brightness(1.7);}
-  100%{filter:brightness(1);}
+  border-radius:12px;
+  padding:6px 8px;
+  flex-shrink:0;
 }
 
 .player-hp-text{
@@ -188,26 +211,27 @@ body{
 }
 
 .player-hp-bar{
-  width:100%;
   height:12px;
+  width:100%;
   background:#020617;
   border-radius:999px;
   overflow:hidden;
 }
 
 .player-hp-inner{
-  width:100%;
   height:100%;
+  width:100%;
   background:linear-gradient(90deg,#ef4444,#f97316,#facc15);
-  transition:0.25s;
+  transition:width 0.25s;
 }
 
 .timer-row{
   display:flex;
-  gap:6px;
+  gap:7px;
   align-items:center;
   font-size:13px;
   font-weight:bold;
+  flex-shrink:0;
 }
 
 .timer-bar-wrap{
@@ -219,17 +243,17 @@ body{
 }
 
 .timer-bar{
-  width:100%;
   height:100%;
+  width:100%;
   background:#38bdf8;
 }
 
 .board-wrap{
   background:#1f2937;
-  border-radius:18px;
   padding:6px;
-  flex:1;
-  display:flex;
+  border-radius:18px;
+  touch-action:none;
+  flex-shrink:0;
 }
 
 .board{
@@ -245,43 +269,47 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  font-size:clamp(22px,8vw,34px);
+  font-size:clamp(22px, 8vw, 34px);
   font-weight:bold;
-  transition:transform 0.03s linear, opacity 0.12s;
+  color:white;
+  will-change:transform;
+  transition:transform 0.035s linear, opacity 0.12s linear;
 }
 
 .selected{
   transform:scale(1.02);
+  box-shadow:none;
+  outline:none;
+  z-index:10;
 }
 
 .clear{
-  opacity:0;
   transform:scale(0.1);
+  opacity:0;
 }
 
-.fire,.fire-bg{
-  background:radial-gradient(circle at 30% 30%, #ffd4a8, #ef4444);
+.fire{background:radial-gradient(circle at 30% 30%, #ffd4a8, #ef4444);}
+.water{background:radial-gradient(circle at 30% 30%, #d7f1ff, #3b82f6);}
+.wood{background:radial-gradient(circle at 30% 30%, #e4ffd8, #22c55e);}
+.light{background:radial-gradient(circle at 30% 30%, #fffad1, #facc15);color:#111827;}
+.dark{background:radial-gradient(circle at 30% 30%, #f5d0fe, #9333ea);}
+.heart{background:radial-gradient(circle at 30% 30%, #ffe4f0, #ec4899);}
+
+.buttons{
+  display:flex;
+  gap:7px;
+  flex-shrink:0;
 }
 
-.water,.water-bg{
-  background:radial-gradient(circle at 30% 30%, #d7f1ff, #3b82f6);
-}
-
-.wood,.wood-bg{
-  background:radial-gradient(circle at 30% 30%, #e4ffd8, #22c55e);
-}
-
-.light,.light-bg{
-  background:radial-gradient(circle at 30% 30%, #fffad1, #facc15);
+button{
+  flex:1;
+  border:none;
+  border-radius:12px;
+  padding:8px;
+  font-size:15px;
+  font-weight:bold;
+  background:#eef2ff;
   color:#111827;
-}
-
-.dark,.dark-bg{
-  background:radial-gradient(circle at 30% 30%, #f5d0fe, #9333ea);
-}
-
-.heart{
-  background:radial-gradient(circle at 30% 30%, #ffe4f0, #ec4899);
 }
 
 .float-number{
@@ -292,774 +320,556 @@ body{
   font-size:24px;
   font-weight:900;
   pointer-events:none;
-  animation:floatUp 0.9s forwards;
+  z-index:50;
   text-shadow:0 2px 4px rgba(0,0,0,0.8);
+  animation:floatUp 0.85s ease-out forwards;
+  white-space:nowrap;
 }
 
-.float-damage{
-  color:#ffe066;
-}
-
-.float-heal{
-  color:#5dff9d;
-}
-
-.float-player{
-  color:#ff7b7b;
+.float-damage{color:#ffdf5d;}
+.float-player-damage{color:#ff6b6b;}
+.float-heal{color:#5dff9d;}
+.float-combo{color:#fff3ad;font-size:26px;}
+.float-attr{
+  position:absolute;
+  right:8px;
+  top:-4px;
+  font-size:13px;
+  font-weight:900;
+  color:#dbeafe;
+  text-shadow:0 2px 4px rgba(0,0,0,0.8);
+  animation:floatSide 0.75s ease-out forwards;
+  pointer-events:none;
 }
 
 @keyframes floatUp{
-  0%{
-    opacity:0;
-    transform:translate(-50%,-20%) scale(0.7);
-  }
-  20%{
-    opacity:1;
-    transform:translate(-50%,-60%) scale(1.1);
-  }
-  100%{
-    opacity:0;
-    transform:translate(-50%,-140%) scale(1);
-  }
+  0%{opacity:0;transform:translate(-50%,-20%) scale(0.8);}
+  15%{opacity:1;transform:translate(-50%,-55%) scale(1.15);}
+  100%{opacity:0;transform:translate(-50%,-135%) scale(1);}
 }
-</style>
-</head>
 
-<body>
-
-<div class="game">
-
-<div class="enemy-panel">
-<div class="enemy-area">
-
-<div class="enemy wood-bg" id="enemyIcon"></div>
-
-<div class="enemy-info">
-
-<div class="enemy-name">
-モリスライム
-</div>
-
-<div class="enemy-small">
-属性：木 / 攻撃：850 / 攻撃まで：1
-</div>
-
-<div class="hp-wrap">
-<div class="enemy-hp-bar" id="enemyHpBar"></div>
-</div>
-
-<div class="enemy-small">
-敵HP：
-<span id="enemyHpText">5000</span>
-/
-5000
-</div>
-
-</div>
-</div>
-</div>
-
-<div class="message" id="message">
-ドロップを動かしたら5秒開始
-</div>
-
-<div class="party" id="party"></div>
-
-<div class="player-hp-area" id="playerHpArea">
-
-<div class="player-hp-text">
-<span>味方HP</span>
-<span>
-<span id="playerHpText">5550</span>
-/
-5550
-</span>
-</div>
-
-<div class="player-hp-bar">
-<div class="player-hp-inner" id="playerHpBar"></div>
-</div>
-
-</div>
-
-<div class="timer-row">
-<span>
-操作時間
-<span id="timerText">5.0</span>
-秒
-</span>
-
-<div class="timer-bar-wrap">
-<div class="timer-bar" id="timerBar"></div>
-</div>
-</div>
-
-<div class="board-wrap">
-<div class="board" id="board"></div>
-</div>
-
-</div>
-
-<script>
-
+@keyframes floatSide{
+  0%{opacity:0;transform:translateY(10px) scale(0.8);}
+  20%{opacity:1;transform:translateY(0) scale(1.1);}
+  100%{opacity:0;transform:translateY(-26px) scale(1);}
+}
+</style></head><body>
+<div class="game">  <div class="enemy-panel">
+    <div class="enemy-area">
+      <div class="enemy wood-bg" id="enemyIcon"></div>
+      <div class="enemy-info">
+        <div class="enemy-name" id="enemyName">モリスライム</div>
+        <div class="enemy-small">属性：<span id="enemyAttrText">木</span> / 攻撃：<span id="enemyAtkText">850</span> / 攻撃まで：<span id="enemyTurnText">1</span></div>
+        <div class="hp-wrap">
+          <div class="enemy-hp-bar" id="enemyHpBar"></div>
+        </div>
+        <div class="enemy-small">敵HP：<span id="enemyHpText">5000</span> / <span id="enemyMaxHpText">5000</span></div>
+      </div>
+    </div>
+  </div>  <div class="message" id="message">ドロップを動かしたら5秒カウント開始</div>  <div class="party" id="party"></div>  <div class="player-hp-area">
+    <div class="player-hp-text">
+      <span>味方HP</span>
+      <span><span id="playerHpText">5550</span> / <span id="playerMaxHpText">5550</span></span>
+    </div>
+    <div class="player-hp-bar">
+      <div class="player-hp-inner" id="playerHpBar"></div>
+    </div>
+  </div>  <div class="timer-row">
+    <span>操作時間 <span id="timerText">5.0</span>秒</span>
+    <div class="timer-bar-wrap">
+      <div class="timer-bar" id="timerBar"></div>
+    </div>
+  </div>  <div class="board-wrap">
+    <div class="board" id="board"></div>
+  </div>  <div class="buttons">
+    <button onclick="resetGame()">リセット</button>
+    <button onclick="nextEnemy()">次の敵</button>
+  </div></div><script>
 const ROWS = 5;
 const COLS = 6;
 const MOVE_TIME = 5;
 
-const TYPES = [
-"fire",
-"water",
-"wood",
-"light",
-"dark",
-"heart"
-];
-
-const ICONS = {
-fire:"火",
-water:"水",
-wood:"木",
-light:"光",
-dark:"闇",
-heart:"♡"
-};
-
-const JP = {
-fire:"火",
-water:"水",
-wood:"木",
-light:"光",
-dark:"闇",
-heart:"回復"
-};
+const TYPES = ["fire","water","wood","light","dark","heart"];
+const ICONS = {fire:"火",water:"水",wood:"木",light:"光",dark:"闇",heart:"♡"};
+const JP = {fire:"火",water:"水",wood:"木",light:"光",dark:"闇",heart:"回復"};
+const BG = {fire:"fire-bg",water:"water-bg",wood:"wood-bg",light:"light-bg",dark:"dark-bg"};
 
 const members = [
-{no:1,attr:"fire",hp:500,atk:150,rcv:15},
-{no:2,attr:"water",hp:1500,atk:50,rcv:45},
-{no:3,attr:"wood",hp:1000,atk:100,rcv:30},
-{no:4,attr:"dark",hp:750,atk:180,rcv:0},
-{no:5,attr:"light",hp:1200,atk:100,rcv:50},
-{no:6,attr:"fire",hp:600,atk:130,rcv:25}
+  {no:1, attr:"fire", hp:500, atk:150, rcv:15},
+  {no:2, attr:"water", hp:1500, atk:50, rcv:45},
+  {no:3, attr:"wood", hp:1000, atk:100, rcv:30},
+  {no:4, attr:"dark", hp:750, atk:180, rcv:0},
+  {no:5, attr:"light", hp:1200, atk:100, rcv:50},
+  {no:6, attr:"fire", hp:600, atk:130, rcv:25}
+];
+
+const enemies = [
+  {name:"モリスライム", attr:"wood", hp:5000, atk:850, turn:1},
+  {name:"アクアゴブリン", attr:"water", hp:6500, atk:950, turn:2},
+  {name:"ファイアドラゴン", attr:"fire", hp:9000, atk:1200, turn:2},
+  {name:"ダークナイト", attr:"dark", hp:12000, atk:1500, turn:2},
+  {name:"ライトゴーレム", attr:"light", hp:16000, atk:1800, turn:3}
 ];
 
 let board = [];
 let dragging = false;
-let selected = null;
 let movedOnce = false;
-let timerId = null;
 let resolving = false;
-
-let playerMaxHp =
-members.reduce((s,m)=>s+m.hp,0);
-
+let selected = null;
+let playerMaxHp = members.reduce((sum,m)=>sum+m.hp,0);
 let playerHp = playerMaxHp;
+let totalRcv = members.reduce((sum,m)=>sum+m.rcv,0);
+let enemyIndex = 0;
+let enemyMaxHp = enemies[0].hp;
+let enemyHp = enemyMaxHp;
+let enemyAttr = enemies[0].attr;
+let enemyAtk = enemies[0].atk;
+let enemyTurnMax = enemies[0].turn;
+let enemyTurn = enemyTurnMax;
+let timerId = null;
+let timeLeft = MOVE_TIME;
+let moveStartTime = 0;
 
-let totalRcv =
-members.reduce((s,m)=>s+m.rcv,0);
+const boardEl = document.getElementById("board");
+const partyEl = document.getElementById("party");
+const message = document.getElementById("message");
+const enemyHpBar = document.getElementById("enemyHpBar");
+const enemyHpText = document.getElementById("enemyHpText");
+const enemyMaxHpText = document.getElementById("enemyMaxHpText");
+const enemyTurnText = document.getElementById("enemyTurnText");
+const enemyName = document.getElementById("enemyName");
+const enemyAttrText = document.getElementById("enemyAttrText");
+const enemyAtkText = document.getElementById("enemyAtkText");
+const enemyIcon = document.getElementById("enemyIcon");
+const playerHpText = document.getElementById("playerHpText");
+const playerMaxHpText = document.getElementById("playerMaxHpText");
+const playerHpBar = document.getElementById("playerHpBar");
+const playerHpArea = document.querySelector(".player-hp-area");
+const timerText = document.getElementById("timerText");
+const timerBar = document.getElementById("timerBar");
 
-let enemyHp = 5000;
+function randomType(){return TYPES[Math.floor(Math.random()*TYPES.length)];}
+function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
 
-const boardEl =
-document.getElementById("board");
-
-const enemyHpBar =
-document.getElementById("enemyHpBar");
-
-const enemyHpText =
-document.getElementById("enemyHpText");
-
-const playerHpBar =
-document.getElementById("playerHpBar");
-
-const playerHpText =
-document.getElementById("playerHpText");
-
-const playerHpArea =
-document.getElementById("playerHpArea");
-
-const timerText =
-document.getElementById("timerText");
-
-const timerBar =
-document.getElementById("timerBar");
-
-const message =
-document.getElementById("message");
-
-const enemyIcon =
-document.getElementById("enemyIcon");
-
-function randomType(){
-return TYPES[
-Math.floor(Math.random()*TYPES.length)
-];
+function popNumber(target, text, className){
+  const div = document.createElement("div");
+  div.className = "float-number " + className;
+  div.innerText = text;
+  target.appendChild(div);
+  setTimeout(()=>div.remove(),900);
 }
 
-function sleep(ms){
-return new Promise(r=>setTimeout(r,ms));
+function popAttr(text){
+  const div = document.createElement("div");
+  div.className = "float-attr";
+  div.innerText = text;
+  enemyIcon.appendChild(div);
+  setTimeout(()=>div.remove(),800);
 }
 
-function popNumber(
-target,
-text,
-className
-){
-const div =
-document.createElement("div");
-
-div.className =
-"float-number " + className;
-
-div.innerText = text;
-
-target.appendChild(div);
-
-setTimeout(()=>div.remove(),900);
+function flashPlayer(type){
+  playerHpArea.classList.remove("hit","heal");
+  void playerHpArea.offsetWidth;
+  playerHpArea.classList.add(type);
+  setTimeout(()=>playerHpArea.classList.remove(type),280);
 }
 
 function renderParty(){
-
-const party =
-document.getElementById("party");
-
-party.innerHTML = "";
-
-for(const m of members){
-
-const div =
-document.createElement("div");
-
-div.className = "member";
-
-div.innerHTML = `
-<div class="atk">
-攻 ${m.atk}
-</div>
-
-<div class="icon ${m.attr}-bg">
-${JP[m.attr]}
-</div>
-
-<div class="name">
-No.${m.no}
-</div>
-`;
-
-party.appendChild(div);
-
-}
-
+  partyEl.innerHTML = "";
+  for(const m of members){
+    const div = document.createElement("div");
+    div.className = "member";
+    div.innerHTML = `<div class="atk">攻 ${m.atk}</div><div class="icon ${BG[m.attr]}">${JP[m.attr]}</div><div class="name">No.${m.no}</div>`;
+    partyEl.appendChild(div);
+  }
 }
 
 function createBoard(){
-
-board = [];
-
-for(let r=0;r<ROWS;r++){
-
-const row = [];
-
-for(let c=0;c<COLS;c++){
-
-row.push(randomType());
-
-}
-
-board.push(row);
-
-}
-
-renderBoard();
-
+  board = [];
+  for(let r=0;r<ROWS;r++){
+    const row = [];
+    for(let c=0;c<COLS;c++) row.push(randomType());
+    board.push(row);
+  }
+  while(getComboGroups().length > 0){
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++) board[r][c] = randomType();
+    }
+  }
+  renderBoard();
 }
 
 function renderBoard(){
-
-boardEl.innerHTML = "";
-
-for(let r=0;r<ROWS;r++){
-
-for(let c=0;c<COLS;c++){
-
-const orb =
-document.createElement("div");
-
-orb.className =
-"orb " + board[r][c];
-
-orb.innerText =
-ICONS[board[r][c]];
-
-if(
-selected &&
-selected.r===r &&
-selected.c===c
-){
-orb.classList.add("selected");
-}
-
-boardEl.appendChild(orb);
-
-}
-
-}
-
+  boardEl.innerHTML = "";
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const type = board[r][c];
+      const orb = document.createElement("div");
+      orb.className = "orb " + type;
+      orb.innerText = ICONS[type];
+      if(selected && selected.r === r && selected.c === c) orb.classList.add("selected");
+      boardEl.appendChild(orb);
+    }
+  }
 }
 
 function getCell(x,y){
-
-const rect =
-boardEl.getBoundingClientRect();
-
-const cellW =
-rect.width / COLS;
-
-const cellH =
-rect.height / ROWS;
-
-const c =
-Math.floor((x-rect.left)/cellW);
-
-const r =
-Math.floor((y-rect.top)/cellH);
-
-if(
-r<0 || c<0 ||
-r>=ROWS || c>=COLS
-){
-return null;
-}
-
-return {r,c};
-
+  const rect = boardEl.getBoundingClientRect();
+  const cellW = rect.width / COLS;
+  const cellH = rect.height / ROWS;
+  const c = Math.floor((x - rect.left) / cellW);
+  const r = Math.floor((y - rect.top) / cellH);
+  if(r<0 || c<0 || r>=ROWS || c>=COLS) return null;
+  return {r,c};
 }
 
 function swap(a,b){
-
-const t =
-board[a.r][a.c];
-
-board[a.r][a.c] =
-board[b.r][b.c];
-
-board[b.r][b.c] = t;
-
+  const t = board[a.r][a.c];
+  board[a.r][a.c] = board[b.r][b.c];
+  board[b.r][b.c] = t;
 }
+function isNear(a,b){return Math.abs(a.r-b.r) + Math.abs(a.c-b.c) === 1;}
 
-function isNear(a,b){
+function moveOneStep(next){
+  if(!selected || !next) return false;
+  if(next.r<0 || next.c<0 || next.r>=ROWS || next.c>=COLS) return false;
+  if(!isNear(selected,next)) return false;
 
-return (
-Math.abs(a.r-b.r)+
-Math.abs(a.c-b.c)
-)===1;
+  if(!movedOnce){
+    movedOnce = true;
+    startTimer();
+    message.innerText = "操作中… 指を離すか5秒で終了";
+  }
 
+  swap(selected,next);
+  selected = next;
+  return true;
 }
 
 function startTimer(){
-
-stopTimer();
-
-let start =
-performance.now();
-
-timerId = setInterval(()=>{
-
-const passed =
-(performance.now()-start)/1000;
-
-const left =
-Math.max(
-0,
-MOVE_TIME-passed
-);
-
-timerText.innerText =
-left.toFixed(1);
-
-timerBar.style.width =
-(left/MOVE_TIME*100)+"%";
-
-if(left<=0){
-endDrag();
-}
-
-},50);
-
+  stopTimer();
+  timeLeft = MOVE_TIME;
+  moveStartTime = performance.now();
+  updateTimerView();
+  timerId = setInterval(()=>{
+    const passed = (performance.now() - moveStartTime) / 1000;
+    timeLeft = Math.max(0, MOVE_TIME - passed);
+    updateTimerView();
+    if(timeLeft <= 0) endDrag();
+  },50);
 }
 
 function stopTimer(){
-
-if(timerId){
-
-clearInterval(timerId);
-
-timerId = null;
-
+  if(timerId){clearInterval(timerId);timerId=null;}
 }
-
+function updateTimerView(){
+  timerText.innerText = timeLeft.toFixed(1);
+  timerBar.style.width = (timeLeft / MOVE_TIME * 100) + "%";
 }
 
 function startDrag(e){
-
-if(resolving) return;
-
-const cell =
-getCell(e.clientX,e.clientY);
-
-if(!cell) return;
-
-dragging = true;
-
-selected = cell;
-
-movedOnce = false;
-
-renderBoard();
-
+  e.preventDefault();
+  if(resolving || playerHp <= 0 || enemyHp <= 0) return;
+  const cell = getCell(e.clientX,e.clientY);
+  if(!cell) return;
+  dragging = true;
+  movedOnce = false;
+  selected = cell;
+  message.innerText = "ドロップを動かすとカウント開始";
+  renderBoard();
 }
 
 function moveDrag(e){
+  e.preventDefault();
+  if(!dragging || !selected || resolving) return;
 
-if(
-!dragging ||
-!selected ||
-resolving
-) return;
+  const cell = getCell(e.clientX,e.clientY);
+  if(!cell) return;
+  if(cell.r === selected.r && cell.c === selected.c) return;
 
-const cell =
-getCell(e.clientX,e.clientY);
+  const dr = cell.r - selected.r;
+  const dc = cell.c - selected.c;
+  const stepR = Math.sign(dr);
+  const stepC = Math.sign(dc);
+  let changed = false;
 
-if(!cell) return;
+  // 斜めに指を動かした時は、直接斜め交換せず「横→縦」または「縦→横」に分解する
+  if(Math.abs(dc) >= Math.abs(dr)){
+    if(stepC !== 0){
+      changed = moveOneStep({r:selected.r, c:selected.c + stepC}) || changed;
+    }
+    if(stepR !== 0){
+      changed = moveOneStep({r:selected.r + stepR, c:selected.c}) || changed;
+    }
+  }else{
+    if(stepR !== 0){
+      changed = moveOneStep({r:selected.r + stepR, c:selected.c}) || changed;
+    }
+    if(stepC !== 0){
+      changed = moveOneStep({r:selected.r, c:selected.c + stepC}) || changed;
+    }
+  }
 
-const dr =
-cell.r - selected.r;
-
-const dc =
-cell.c - selected.c;
-
-if(
-Math.abs(dr)+
-Math.abs(dc)===1
-){
-
-if(!movedOnce){
-
-movedOnce = true;
-
-startTimer();
-
-message.innerText =
-"操作中…";
-
+  if(changed) renderBoard();
 }
 
-swap(selected,cell);
-
-selected = cell;
-
-renderBoard();
-
+function endDrag(e){
+  if(e) e.preventDefault();
+  if(!dragging) return;
+  dragging = false;
+  stopTimer();
+  selected = null;
+  renderBoard();
+  if(!movedOnce){
+    message.innerText = "ドロップを動かすと5秒カウント開始";
+    return;
+  }
+  resolveBoard();
 }
 
+function getMatchedCells(){
+  const map = {};
+  for(let r=0;r<ROWS;r++){
+    let count = 1;
+    for(let c=1;c<=COLS;c++){
+      if(c<COLS && board[r][c] && board[r][c] === board[r][c-1]) count++;
+      else{
+        if(count >= 3){for(let k=0;k<count;k++) map[r+","+(c-1-k)] = true;}
+        count = 1;
+      }
+    }
+  }
+  for(let c=0;c<COLS;c++){
+    let count = 1;
+    for(let r=1;r<=ROWS;r++){
+      if(r<ROWS && board[r][c] && board[r][c] === board[r-1][c]) count++;
+      else{
+        if(count >= 3){for(let k=0;k<count;k++) map[(r-1-k)+","+c] = true;}
+        count = 1;
+      }
+    }
+  }
+  return map;
 }
 
-function endDrag(){
-
-if(!dragging) return;
-
-dragging = false;
-
-selected = null;
-
-stopTimer();
-
-renderBoard();
-
-if(!movedOnce){
-return;
-}
-
-resolveBoard();
-
-}
-
-function getMatches(){
-
-const map = {};
-
-for(let r=0;r<ROWS;r++){
-
-let count = 1;
-
-for(let c=1;c<=COLS;c++){
-
-if(
-c<COLS &&
-board[r][c]===
-board[r][c-1]
-){
-count++;
-}else{
-
-if(count>=3){
-
-for(let k=0;k<count;k++){
-
-map[
-r+","+(c-1-k)
-]=true;
-
-}
-
-}
-
-count=1;
-
-}
-
-}
-
-}
-
-for(let c=0;c<COLS;c++){
-
-let count = 1;
-
-for(let r=1;r<=ROWS;r++){
-
-if(
-r<ROWS &&
-board[r][c]===
-board[r-1][c]
-){
-count++;
-}else{
-
-if(count>=3){
-
-for(let k=0;k<count;k++){
-
-map[
-(r-1-k)+","+c
-]=true;
-
-}
-
-}
-
-count=1;
-
-}
-
-}
-
-}
-
-return Object.keys(map);
-
+function getComboGroups(){
+  const matched = getMatchedCells();
+  const visited = {};
+  const groups = [];
+  const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+  for(const key of Object.keys(matched)){
+    if(visited[key]) continue;
+    const [sr,sc] = key.split(",").map(Number);
+    const type = board[sr][sc];
+    const stack = [{r:sr,c:sc}];
+    const cells = [];
+    visited[key] = true;
+    while(stack.length){
+      const cur = stack.pop();
+      cells.push(cur);
+      for(const [dr,dc] of dirs){
+        const nr = cur.r + dr;
+        const nc = cur.c + dc;
+        const nk = nr + "," + nc;
+        if(nr<0 || nc<0 || nr>=ROWS || nc>=COLS) continue;
+        if(!matched[nk] || visited[nk]) continue;
+        if(board[nr][nc] !== type) continue;
+        visited[nk] = true;
+        stack.push({r:nr,c:nc});
+      }
+    }
+    groups.push({type,cells,count:cells.length});
+  }
+  return groups;
 }
 
 async function resolveBoard(){
-
-resolving = true;
-
-let combo = 0;
-
-while(true){
-
-const matches =
-getMatches();
-
-if(matches.length<=0){
-break;
+  resolving = true;
+  let combo = 0;
+  const clearedGroups = [];
+  while(true){
+    const groups = getComboGroups();
+    if(groups.length === 0) break;
+    for(const group of groups){
+      combo++;
+      clearedGroups.push({...group, combo});
+      message.innerText = combo + "コンボ！ " + JP[group.type] + "を" + group.count + "個消した！";
+      markClear(group.cells);
+      await sleep(230);
+      for(const cell of group.cells) board[cell.r][cell.c] = null;
+      renderBoard();
+      await sleep(80);
+    }
+    dropOrbs();
+    renderBoard();
+    await sleep(260);
+  }
+  if(combo === 0){
+    message.innerText = "コンボなし";
+    enemyAttackIfNeeded();
+    resolving = false;
+    return;
+  }
+  const result = calculateResult(clearedGroups, combo);
+  applyDamageAndHeal(result, combo);
+  await sleep(650);
+  if(enemyHp <= 0){
+    await sleep(500);
+    nextEnemy();
+  }else if(playerHp > 0){
+    enemyAttackIfNeeded();
+  }
+  resolving = false;
 }
 
-combo++;
-
-message.innerText =
-combo + "コンボ！";
-
-for(const key of matches){
-
-const parts =
-key.split(",");
-
-const r =
-Number(parts[0]);
-
-const c =
-Number(parts[1]);
-
-const index =
-r*COLS+c;
-
-boardEl.children[index]
-.classList.add("clear");
-
-}
-
-await sleep(180);
-
-for(const key of matches){
-
-const parts =
-key.split(",");
-
-const r =
-Number(parts[0]);
-
-const c =
-Number(parts[1]);
-
-board[r][c] = null;
-
-}
-
-dropOrbs();
-
-renderBoard();
-
-await sleep(220);
-
-}
-
-if(combo>0){
-
-let damage =
-Math.floor(combo*850);
-
-enemyHp =
-Math.max(0,enemyHp-damage);
-
-enemyHpText.innerText =
-enemyHp;
-
-enemyHpBar.style.width =
-(enemyHp/5000*100)+"%";
-
-enemyIcon.classList.add("hit");
-
-setTimeout(()=>{
-enemyIcon.classList.remove("hit");
-},180);
-
-popNumber(
-enemyIcon,
-damage,
-"float-damage"
-);
-
-message.innerText =
-combo +
-"コンボ！ " +
-damage +
-"ダメージ！";
-
-if(enemyHp<=0){
-
-message.innerText =
-"敵を倒した！";
-
-}
-
-}else{
-
-message.innerText =
-"コンボなし";
-
-}
-
-await sleep(500);
-
-if(enemyHp>0){
-
-playerHp =
-Math.max(
-0,
-playerHp-850
-);
-
-playerHpText.innerText =
-playerHp;
-
-playerHpBar.style.width =
-(playerHp/playerMaxHp*100)
-+"%";
-
-playerHpArea.classList.add("hit");
-
-setTimeout(()=>{
-playerHpArea
-.classList.remove("hit");
-},250);
-
-popNumber(
-playerHpArea,
-"-850",
-"float-player"
-);
-
-message.innerText +=
-" 敵の攻撃！";
-
-}
-
-resolving = false;
-
+function markClear(cells){
+  const orbs = [...boardEl.children];
+  for(const cell of cells){
+    const index = cell.r * COLS + cell.c;
+    if(orbs[index]) orbs[index].classList.add("clear");
+  }
 }
 
 function dropOrbs(){
-
-for(let c=0;c<COLS;c++){
-
-const remain = [];
-
-for(let r=ROWS-1;r>=0;r--){
-
-if(board[r][c]){
-
-remain.push(board[r][c]);
-
+  for(let c=0;c<COLS;c++){
+    const remain = [];
+    for(let r=ROWS-1;r>=0;r--) if(board[r][c]) remain.push(board[r][c]);
+    while(remain.length < ROWS) remain.push(randomType());
+    for(let r=ROWS-1;r>=0;r--) board[r][c] = remain[ROWS-1-r];
+  }
 }
 
+function comboMultiplier(combo){return 1 + (combo - 1) * 0.25;}
+function orbCountMultiplier(count){return 1 + (count - 3) * 0.25;}
+function leaderMultiplier(combo){
+  let m = 1;
+  if(combo >= 5) m *= 3;
+  else if(combo >= 4) m *= 2;
+  if(combo >= 7) m *= 5;
+  return m;
+}
+function attrRate(attacker, defender){
+  if(attacker === "fire" && defender === "wood") return 2;
+  if(attacker === "fire" && defender === "water") return 0.5;
+  if(attacker === "water" && defender === "fire") return 2;
+  if(attacker === "water" && defender === "wood") return 0.5;
+  if(attacker === "wood" && defender === "water") return 2;
+  if(attacker === "wood" && defender === "fire") return 0.5;
+  if(attacker === "light" && defender === "dark") return 2;
+  if(attacker === "dark" && defender === "light") return 2;
+  return 1;
 }
 
-while(remain.length<ROWS){
-
-remain.push(randomType());
-
+function calculateResult(groups, combo){
+  const cMul = comboMultiplier(combo);
+  const lMul = leaderMultiplier(combo);
+  let totalDamage = 0;
+  let totalHeal = 0;
+  for(const group of groups){
+    const oMul = orbCountMultiplier(group.count);
+    if(group.type === "heart"){
+      totalHeal += Math.floor(totalRcv * oMul * cMul);
+      continue;
+    }
+    const attackers = members.filter(m=>m.attr === group.type);
+    for(const m of attackers){
+      const rate = attrRate(m.attr, enemyAttr);
+      totalDamage += Math.floor(m.atk * oMul * cMul * lMul * rate);
+    }
+  }
+  return {totalDamage,totalHeal,lMul};
 }
 
-for(let r=ROWS-1;r>=0;r--){
-
-board[r][c] =
-remain[ROWS-1-r];
-
+function applyDamageAndHeal(result, combo){
+  if(result.totalHeal > 0) playerHp = Math.min(playerMaxHp, playerHp + result.totalHeal);
+  if(result.totalDamage > 0){
+    enemyHp = Math.max(0, enemyHp - result.totalDamage);
+    enemyIcon.classList.add("hit");
+    setTimeout(()=>enemyIcon.classList.remove("hit"),180);
+  }
+  updateHpViews();
+  let text = combo + "コンボ！ " + result.totalDamage + "ダメージ！";
+  if(result.totalHeal > 0) text += " HP" + result.totalHeal + "回復！";
+  if(result.lMul > 1) text += " LS" + result.lMul + "倍！";
+  if(enemyHp <= 0) text += " 敵を倒した！";
+  message.innerText = text;
 }
 
+function enemyAttackIfNeeded(){
+  if(enemyHp <= 0 || playerHp <= 0) return;
+  enemyTurn--;
+  if(enemyTurn <= 0){
+    playerHp = Math.max(0, playerHp - enemyAtk);
+    enemyTurn = enemyTurnMax;
+    updateHpViews();
+    if(playerHp <= 0) message.innerText = "敵の攻撃！ " + enemyAtk + "ダメージ… ゲームオーバー";
+    else message.innerText += " / 敵の攻撃！" + enemyAtk + "ダメージ";
+  }
+  enemyTurnText.innerText = enemyTurn;
 }
 
+function setEnemy(index){
+  enemyIndex = index;
+  const e = enemies[enemyIndex];
+  enemyMaxHp = e.hp;
+  enemyHp = e.hp;
+  enemyAttr = e.attr;
+  enemyAtk = e.atk;
+  enemyTurnMax = e.turn;
+  enemyTurn = e.turn;
+  enemyName.innerText = e.name;
+  enemyAttrText.innerText = JP[e.attr];
+  enemyAtkText.innerText = e.atk;
+  enemyIcon.className = "enemy " + BG[e.attr];
+  updateHpViews();
 }
 
-boardEl.addEventListener(
-"pointerdown",
-startDrag
-);
+function nextEnemy(){
+  stopTimer();
+  dragging = false;
+  resolving = false;
+  selected = null;
+  if(enemyIndex >= enemies.length - 1){
+    message.innerText = "ダンジョンクリア！ 全ての敵を倒した！";
+    return;
+  }
+  setEnemy(enemyIndex + 1);
+  createBoard();
+  timeLeft = MOVE_TIME;
+  updateTimerView();
+  message.innerText = "次の敵が出現！ ドロップを動かそう";
+}
 
-window.addEventListener(
-"pointermove",
-moveDrag
-);
+function updateHpViews(){
+  enemyHpText.innerText = enemyHp;
+  enemyMaxHpText.innerText = enemyMaxHp;
+  enemyHpBar.style.width = (enemyHp / enemyMaxHp * 100) + "%";
+  playerHpText.innerText = playerHp;
+  playerMaxHpText.innerText = playerMaxHp;
+  playerHpBar.style.width = (playerHp / playerMaxHp * 100) + "%";
+  enemyTurnText.innerText = enemyTurn;
+}
 
-window.addEventListener(
-"pointerup",
-endDrag
-);
+function resetGame(){
+  stopTimer();
+  dragging = false;
+  movedOnce = false;
+  resolving = false;
+  selected = null;
+  playerHp = playerMaxHp;
+  setEnemy(0);
+  timeLeft = MOVE_TIME;
+  updateTimerView();
+  message.innerText = "ドロップを動かしたら5秒カウント開始";
+  createBoard();
+}
+
+boardEl.addEventListener("pointerdown", startDrag);
+window.addEventListener("pointermove", moveDrag);
+window.addEventListener("pointerup", endDrag);
+window.addEventListener("pointercancel", endDrag);
 
 renderParty();
-createBoard();
-
-</script>
-
-</body>
+resetGame();
+</script></body>
 </html>
