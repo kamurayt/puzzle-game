@@ -9,29 +9,37 @@
 html,body{width:100%;height:100%;overflow:hidden;background:#0f172a;color:#fff;font-family:sans-serif;touch-action:none}
 body{display:flex;justify-content:center}
 .game{width:100%;max-width:430px;height:100svh;padding:7px;display:flex;flex-direction:column;gap:6px}
-.screen{display:none;height:100%;flex-direction:column;gap:7px}.screen.active{display:flex}
+.screen{display:none;height:100%;flex-direction:column;gap:7px}
+.screen.active{display:flex}
 .title{text-align:center;font-size:26px;font-weight:900;color:#fff3ad;margin:6px 0}
 button,select{border:0;border-radius:13px;padding:11px;font-size:16px;font-weight:900;background:#eef2ff;color:#111827}
-select{width:100%}.menu{display:flex;flex-direction:column;gap:9px}.row{display:flex;gap:6px}.row button{flex:1}
+select{width:100%}
+.menu{display:flex;flex-direction:column;gap:9px}
+.row{display:flex;gap:6px}
+.row button{flex:1}
 .card,.status{background:#111827;border-radius:14px;padding:9px}
 .status{background:#020617;font-size:12px;line-height:1.5;color:#cbd5e1}
 .list{overflow:auto;display:flex;flex-direction:column;gap:6px}
-.char-row,.drop-row{background:#1e293b;border-radius:10px;padding:8px;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.char-row,.drop-row{background:#1e293b;border-radius:10px;padding:8px;font-size:13px;display:flex;justify-content:space-between;align-items:center;border:2px solid transparent}
 .char-row.in-party{outline:2px solid #fff3ad;background:#293548}
-.enemy-area{display:flex;gap:7px;align-items:center}.enemy{width:50px;height:50px;border-radius:50%;position:relative;flex-shrink:0}
-.enemy-info{flex:1;font-size:11px;color:#cbd5e1;padding-right:54px}.enemy-name{font-size:17px;color:white;font-weight:900}
+.enemy-area{display:flex;gap:7px;align-items:center}
+.enemy{width:50px;height:50px;border-radius:50%;position:relative;flex-shrink:0}
+.enemy-info{flex:1;font-size:11px;color:#cbd5e1;padding-right:54px}
+.enemy-name{font-size:17px;color:white;font-weight:900}
 .hp-wrap{height:11px;background:#020617;border-radius:999px;overflow:hidden;margin:3px 0}
 .enemy-hp-bar{height:100%;background:linear-gradient(90deg,#22c55e,#bef264);width:100%;transition:.25s}
 .top-retreat{position:absolute;right:7px;top:7px;padding:5px 9px;font-size:12px;border-radius:999px;background:#fee2e2;color:#991b1b}
 .message{background:#020617;border-radius:11px;min-height:34px;padding:6px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:14px;font-weight:900;color:#fff3ad}
 .party{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
-.member{background:#1e293b;border-radius:9px;padding:2px;text-align:center;position:relative}
-.member.leader{outline:2px solid #facc15}.member.friend{outline:2px solid #38bdf8}
-.role{position:absolute;left:2px;top:2px;background:#020617;border-radius:5px;font-size:8px;padding:1px 3px;color:#fff3ad}
+.member{background:#1e293b;border-radius:9px;padding:2px;text-align:center;position:relative;border:2px solid transparent}
+.member.leader{outline:2px solid #facc15}
+.member.friend{outline:2px solid #38bdf8}
+.role{position:absolute;left:2px;top:2px;background:#020617;border-radius:5px;font-size:8px;padding:1px 3px;color:#fff3ad;z-index:2}
 .member .atk{font-size:9px;color:#fde68a;font-weight:900}
 .member .icon{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900}
 .member .name{font-size:8px}
 .icon-img{width:100%;aspect-ratio:1;border-radius:50%;object-fit:cover;display:block;background:#020617}
+.detail-img{width:120px;height:120px;border-radius:18px;object-fit:cover;display:block;margin:0 auto 8px;background:#020617}
 .player{background:#111827;border-radius:11px;padding:6px;position:relative}
 .hp-text{display:flex;justify-content:space-between;font-size:12px;font-weight:900;margin-bottom:3px}
 .player-hp-bar{height:11px;background:#020617;border-radius:999px;overflow:hidden}
@@ -46,7 +54,10 @@ select{width:100%}.menu{display:flex;flex-direction:column;gap:9px}.row{display:
 .orb.held{opacity:.15;transform:scale(.9)}
 .drag-orb{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(22px,8vw,36px);font-weight:900;pointer-events:none;z-index:100;transform:translate(-50%,-50%) scale(1.08);box-shadow:0 8px 20px rgba(0,0,0,.45)}
 .float{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:900;pointer-events:none;animation:floatUp 1.6s forwards;text-shadow:0 2px 4px #000;z-index:50;white-space:nowrap}
-.member .float{font-size:14px}.damage{color:#ffe066}.hurt{color:#ff7b7b}.healNum{color:#5dff9d}
+.member .float{font-size:14px}
+.damage{color:#ffe066}
+.hurt{color:#ff7b7b}
+.healNum{color:#5dff9d}
 @keyframes floatUp{20%{opacity:1;transform:translate(-50%,-65%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-145%) scale(1)}}
 .combo-effect{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-size:42px;font-weight:900;color:#fff3ad;text-shadow:0 0 12px #facc15,0 0 24px #f59e0b,0 4px 10px #000;pointer-events:none;z-index:9999;animation:comboAnim .9s forwards}
 @keyframes comboAnim{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.25)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-80%) scale(1.1)}}
@@ -57,7 +68,18 @@ select{width:100%}.menu{display:flex;flex-direction:column;gap:9px}.row{display:
 .dark,.dark-bg{background:radial-gradient(circle at 30% 30%,#f5d0fe,#9333ea)}
 .none,.none-bg{background:radial-gradient(circle at 30% 30%,#eee,#64748b)}
 .heart{background:radial-gradient(circle at 30% 30%,#ffe4f0,#ec4899)}
-.attr-fire{color:#ff8a8a;font-weight:900}.attr-water{color:#8ecbff;font-weight:900}.attr-wood{color:#8dff9c;font-weight:900}.attr-light{color:#fff083;font-weight:900}.attr-dark{color:#d8a0ff;font-weight:900}.attr-none{color:#ddd;font-weight:900}
+.attr-fire{color:#ff8a8a;font-weight:900}
+.attr-water{color:#8ecbff;font-weight:900}
+.attr-wood{color:#8dff9c;font-weight:900}
+.attr-light{color:#fff083;font-weight:900}
+.attr-dark{color:#d8a0ff;font-weight:900}
+.attr-none{color:#ddd;font-weight:900}
+.border-fire{border-color:#ef4444!important}
+.border-water{border-color:#3b82f6!important}
+.border-wood{border-color:#22c55e!important}
+.border-light{border-color:#facc15!important}
+.border-dark{border-color:#9333ea!important}
+.border-none{border-color:#94a3b8!important}
 .result-box{background:#111827;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .result-title{text-align:center;font-size:26px;font-weight:900;color:#fff3ad}
 .result-item{background:#020617;border-radius:12px;padding:10px;font-size:15px;line-height:1.5}
@@ -66,11 +88,14 @@ select{width:100%}.menu{display:flex;flex-direction:column;gap:9px}.row{display:
 .modal-box{width:100%;max-width:390px;background:#111827;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .modal-title{font-size:20px;font-weight:900;color:#fff3ad}
 .modal-text{font-size:13px;line-height:1.55;color:#e5e7eb;white-space:pre-wrap;max-height:55svh;overflow:auto}
+.modal-list{display:flex;flex-direction:column;gap:6px;max-height:55svh;overflow:auto}
+.modal-char-btn{background:#1e293b;color:#fff;text-align:left;font-size:13px;padding:8px;border-radius:10px;border:2px solid transparent}
 .gacha-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
-.gacha-card{background:#1e293b;border-radius:9px;padding:6px;text-align:center;font-size:11px}
+.gacha-card{background:#1e293b;border-radius:9px;padding:6px;text-align:center;font-size:11px;border:2px solid transparent}
 .gacha-card .icon{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;margin-bottom:2px}
 .gacha-card .icon-img{margin-bottom:2px}
-.rare6{outline:2px solid #facc15}.rare5{outline:2px solid #c084fc}
+.rare6{outline:2px solid #facc15}
+.rare5{outline:2px solid #c084fc}
 </style>
 </head>
 <body>
@@ -350,12 +375,17 @@ let playerMaxHp=0,playerHp=0,totalRcv=0,enemyHp=0,enemyMaxHp=0,enemyAtk=0,floorI
 const boardEl=$("board"),boardWrap=$("boardWrap"),partyEl=$("party"),message=$("message");
 
 function attrSpan(attr){return `<span class="attr-${attr}">${JP[attr]}</span>`}
+function attrBorder(attr){return `border-${attr||"none"}`}
 function hasImage(no){return no===42}
 function charIcon(c){
   if(hasImage(c.no)){
     return `<img class="icon-img" src="${c.no}.png" onerror="this.outerHTML='<div class=&quot;icon ${BG[c.attr]}&quot;>${JP[c.attr]}</div>'">`;
   }
   return `<div class="icon ${BG[c.attr]}">${JP[c.attr]}</div>`;
+}
+function detailImageHtml(c){
+  if(!hasImage(c.no))return "";
+  return `<img class="detail-img ${attrBorder(c.attr)}" src="${c.no}.png" onerror="this.style.display='none'">`;
 }
 
 function showScreen(id){
@@ -405,7 +435,7 @@ function renderCharList(){
   const list=$("charList");list.innerHTML="";
   sortedOwned().forEach(c=>{
     const row=document.createElement("div");
-    row.className="char-row";
+    row.className=`char-row ${attrBorder(c.attr)}`;
     const kind=c.type==="skill"?"スキル素材":c.type==="awake"?"覚醒素材":"戦闘";
     row.innerHTML=`<span>★${c.rarity} No.${c.no} ${c.name}<br>${attrSpan(c.attr)} / Lv${c.lv||1} / SLv${c.skillLv||1} / ${kind}</span><span>×${c.count||1}</span>`;
     row.onclick=()=>showCharDetail(c);
@@ -441,7 +471,7 @@ ${c.ls||"なし"}`;
     buttons.unshift({label:"この枠に編成",fn:()=>{save.partyNos[selectedSlot]=c.no;saveData();renderFormation()}});
   }
 
-  modal(`No.${c.no} ${c.name}`,text,buttons);
+  modal(`No.${c.no} ${c.name}`,detailImageHtml(c)+text,buttons);
 }
 
 function levelCost(c){
@@ -502,7 +532,7 @@ function renderFormation(){
   save.partyNos.slice(0,6).forEach((no,i)=>{
     const c=getCharByNo(no);
     const d=document.createElement("div");
-    d.className="member "+(i===0?"leader":i===5?"friend":"");
+    d.className=`member ${attrBorder(c.attr)} ${i===0?"leader":i===5?"friend":""}`;
     if(i===selectedSlot)d.style.outline="3px solid #fff3ad";
     d.innerHTML=`<div class="role">${i===0?"L":i===5?"F":i+1}</div><div class="atk">攻 ${stat(c,"atk")}</div>${charIcon(c)}<div class="name">No.${c.no}</div>`;
     d.onclick=()=>{selectedSlot=i;renderFormation()};
@@ -511,7 +541,7 @@ function renderFormation(){
   sortArray([...getBattleOwned()],"formationSortSelect").forEach(c=>{
     const role=partyRole(c.no);
     const row=document.createElement("div");
-    row.className="char-row "+(role?"in-party":"");
+    row.className=`char-row ${attrBorder(c.attr)} ${role?"in-party":""}`;
     row.innerHTML=`<span>★${c.rarity} No.${c.no} ${c.name}<br>${attrSpan(c.attr)} / Lv${c.lv||1} / SLv${c.skillLv||1}${role?`<br>${role}`:""}</span><span>詳細</span>`;
     row.onclick=()=>showCharDetail(c,true);
     list.appendChild(row);
@@ -525,7 +555,7 @@ function renderParty(){
   partyEl.innerHTML="";
   party.forEach((c,i)=>{
     const d=document.createElement("div");
-    d.className="member "+(i===0?"leader":i===5?"friend":"");
+    d.className=`member ${attrBorder(c.attr)} ${i===0?"leader":i===5?"friend":""}`;
     d.innerHTML=`<div class="role">${i===0?"L":i===5?"F":""}</div><div class="atk">攻 ${stat(c,"atk")}</div>${charIcon(c)}<div class="name">No.${c.no}</div>`;
     d.onclick=()=>battleSkillPopup(c);
     partyEl.appendChild(d);
@@ -533,7 +563,7 @@ function renderParty(){
 }
 
 function battleSkillPopup(c){
-  modal(`No.${c.no} ${c.name}`,`スキル：\n${skillText(c)}\n\n使いますか？`,[
+  modal(`No.${c.no} ${c.name}`,detailImageHtml(c)+`スキル：\n${skillText(c)}\n\n使いますか？`,[
     {label:"使う",fn:()=>useSkill(c)},
     {label:"やめる"}
   ]);
@@ -598,7 +628,7 @@ function doGacha(n){
     got.push(c);addOwned(c);
   }
   saveData();$("gachaStoneText").textContent=save.stone;updateHome();
-  $("gachaResult").innerHTML=`<div class="gacha-grid">${got.map(c=>`<div class="gacha-card rare${c.rarity}" onclick="showCharDetailByNo(${c.no})">${charIcon(c)}★${c.rarity}<br>No.${c.no}<br>${c.name}</div>`).join("")}</div>`;
+  $("gachaResult").innerHTML=`<div class="gacha-grid">${got.map(c=>`<div class="gacha-card ${attrBorder(c.attr)} rare${c.rarity}" onclick="showCharDetailByNo(${c.no})">${charIcon(c)}★${c.rarity}<br>No.${c.no}<br>${c.name}</div>`).join("")}</div>`;
 }
 
 function showCharDetailByNo(no){
@@ -607,10 +637,18 @@ function showCharDetailByNo(no){
 }
 
 function showGachaInfo(){
-  const groups=[2,3,4,5,6].map(r=>{
-    return `★${r}\n`+gachaChars.filter(c=>c.rarity===r).map(c=>`No.${c.no} ${c.name} / ${JP[c.attr]}`).join("\n");
-  }).join("\n\n");
-  modal("排出率・排出キャラ",`排出率\n★2：40%\n★3：38%\n★4：15%\n★5：5%\n★6：2%\n\n${groups}`,[{label:"閉じる"}]);
+  const html=[
+    `<div style="font-size:13px;line-height:1.6;margin-bottom:8px">排出率<br>★2：40%　★3：38%　★4：15%　★5：5%　★6：2%</div>`,
+    `<div class="modal-list">`,
+    ...[2,3,4,5,6].flatMap(r=>[
+      `<div style="font-weight:900;color:#fff3ad;margin-top:6px">★${r}</div>`,
+      ...gachaChars.filter(c=>c.rarity===r).map(c=>
+        `<button class="modal-char-btn ${attrBorder(c.attr)}" onclick="showCharDetailByNo(${c.no})">No.${c.no} ${c.name} / ${JP[c.attr]}</button>`
+      )
+    ]),
+    `</div>`
+  ].join("");
+  modal("排出率・排出キャラ",html,[{label:"閉じる"}]);
 }
 
 function makeMaterial(type){
@@ -801,22 +839,42 @@ function endDrag(e){
 
 function getMatches(){
   const mark={};
+
   for(let r=0;r<ROWS;r++){
     let count=1;
     for(let c=1;c<=COLS;c++){
-      if(c<COLS&&board[r][c]===board[r][c-1])count++;
-      else{if(count>=3)for(let k=0;k<count;k++)mark[r+","+(c-1-k)]=true;count=1}
+      if(c<COLS && board[r][c] && board[r][c]===board[r][c-1]){
+        count++;
+      }else{
+        if(count>=3){
+          for(let k=0;k<count;k++){
+            mark[r+","+(c-1-k)]=true;
+          }
+        }
+        count=1;
+      }
     }
   }
+
   for(let c=0;c<COLS;c++){
     let count=1;
     for(let r=1;r<=ROWS;r++){
-      if(r<ROWS&&board[r][c]===board[r-1][c])count++;
-      else{if(count>=3)for(let k=0;k<count;k++)mark[(r-1-k)+","+c]=true;count=1}
+      if(r<ROWS && board[r][c] && board[r][c]===board[r-1][c]){
+        count++;
+      }else{
+        if(count>=3){
+          for(let k=0;k<count;k++){
+            mark[(r-1-k)+","+c]=true;
+          }
+        }
+        count=1;
+      }
     }
   }
+
   return mark;
 }
+
 function showCombo(n){
   const e=document.createElement("div");
   e.className="combo-effect";
@@ -918,9 +976,9 @@ function nextFloor(){
   }
 }
 
-function modal(title,text,buttons){
+function modal(title,html,buttons){
   $("modalTitle").textContent=title;
-  $("modalText").textContent=text;
+  $("modalText").innerHTML=html;
   const b=$("modalButtons");
   b.innerHTML="";
   buttons.forEach(x=>{
