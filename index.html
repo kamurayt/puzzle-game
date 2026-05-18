@@ -12,7 +12,8 @@ body{display:flex;justify-content:center}
 .screen{display:none;height:100%;flex-direction:column;gap:7px}
 .screen.active{display:flex}
 .title{text-align:center;font-size:26px;font-weight:900;color:#fff3ad;margin:6px 0}
-button{border:0;border-radius:13px;padding:11px;font-size:16px;font-weight:900;background:#eef2ff;color:#111827}
+button,select{border:0;border-radius:13px;padding:11px;font-size:16px;font-weight:900;background:#eef2ff;color:#111827}
+select{width:100%}
 .menu{display:flex;flex-direction:column;gap:9px}
 .row{display:flex;gap:6px}.row button{flex:1}
 .card,.status{background:#111827;border-radius:14px;padding:9px}
@@ -38,10 +39,6 @@ button{border:0;border-radius:13px;padding:11px;font-size:16px;font-weight:900;b
 .member .icon{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900}
 .member .name{font-size:8px}
 .player{background:#111827;border-radius:11px;padding:6px;position:relative}
-.player.hit{animation:shake .25s}
-.player.heal{animation:heal .25s}
-@keyframes shake{25%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
-@keyframes heal{50%{filter:brightness(1.8)}}
 .hp-text{display:flex;justify-content:space-between;font-size:12px;font-weight:900;margin-bottom:3px}
 .player-hp-bar{height:11px;background:#020617;border-radius:999px;overflow:hidden}
 .player-hp-inner{height:100%;width:100%;background:linear-gradient(90deg,#ef4444,#f97316,#facc15);transition:.25s}
@@ -52,11 +49,9 @@ button{border:0;border-radius:13px;padding:11px;font-size:16px;font-weight:900;b
 .board{width:100%;height:auto;max-height:100%;aspect-ratio:6/5;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(5,1fr);gap:4px}
 .orb{border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(21px,8vw,34px);font-weight:900;transition:.07s}
 .orb.held{opacity:.15;transform:scale(.9)}
-.orb.clear{opacity:0;transform:scale(.1)}
 .drag-orb{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(22px,8vw,36px);font-weight:900;pointer-events:none;z-index:100;transform:translate(-50%,-50%) scale(1.08);box-shadow:0 8px 20px rgba(0,0,0,.45)}
 .float{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:900;pointer-events:none;animation:floatUp 1.6s forwards;text-shadow:0 2px 4px #000;z-index:50;white-space:nowrap}
-.member .float{font-size:14px}
-.damage{color:#ffe066}.healNum{color:#5dff9d}.hurt{color:#ff7b7b}
+.member .float{font-size:14px}.damage{color:#ffe066}.hurt{color:#ff7b7b}
 @keyframes floatUp{20%{opacity:1;transform:translate(-50%,-65%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-145%) scale(1)}}
 .combo-effect{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-size:42px;font-weight:900;color:#fff3ad;text-shadow:0 0 12px #facc15,0 0 24px #f59e0b,0 4px 10px #000;pointer-events:none;z-index:9999;animation:comboAnim .9s forwards}
 @keyframes comboAnim{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.25)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-80%) scale(1.1)}}
@@ -65,6 +60,7 @@ button{border:0;border-radius:13px;padding:11px;font-size:16px;font-weight:900;b
 .wood,.wood-bg{background:radial-gradient(circle at 30% 30%,#e4ffd8,#22c55e)}
 .light,.light-bg{background:radial-gradient(circle at 30% 30%,#fffad1,#facc15);color:#111827}
 .dark,.dark-bg{background:radial-gradient(circle at 30% 30%,#f5d0fe,#9333ea)}
+.none,.none-bg{background:radial-gradient(circle at 30% 30%,#eee,#64748b)}
 .heart{background:radial-gradient(circle at 30% 30%,#ffe4f0,#ec4899)}
 .result-box{background:#111827;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .result-title{text-align:center;font-size:26px;font-weight:900;color:#fff3ad}
@@ -96,7 +92,10 @@ button{border:0;border-radius:13px;padding:11px;font-size:16px;font-weight:900;b
 <section id="dungeonMenu" class="screen">
   <div class="title">ダンジョン</div>
   <div class="menu">
-    <button onclick="startDungeon()">ノーマルダンジョン</button>
+    <button onclick="startDungeon('normal')">ノーマルダンジョン</button>
+    <button onclick="startDungeon('skill')">スキル強化ダンジョン</button>
+    <button onclick="startDungeon('awake')">覚醒ダンジョン</button>
+    <button onclick="startDungeon('special')">特殊ダンジョン</button>
     <button onclick="showScreen('home')">戻る</button>
   </div>
 </section>
@@ -107,6 +106,15 @@ button{border:0;border-radius:13px;padding:11px;font-size:16px;font-weight:900;b
     <button onclick="showScreen('home')">戻る</button>
     <button onclick="showScreen('formation')">編成</button>
   </div>
+  <select id="sortSelect" onchange="renderCharList()">
+    <option value="no">No順</option>
+    <option value="rarity">レア度順</option>
+    <option value="attr">属性順</option>
+    <option value="hp">HP順</option>
+    <option value="atk">攻撃順</option>
+    <option value="rcv">回復順</option>
+    <option value="lv">Lv順</option>
+  </select>
   <div class="list" id="charList"></div>
 </section>
 
@@ -141,7 +149,7 @@ button{border:0;border-radius:13px;padding:11px;font-size:16px;font-weight:900;b
 </section>
 
 <section id="battle" class="screen">
-  <div class="card">
+  <div class="card" style="position:relative">
     <button class="top-retreat" onclick="retreatDungeon()">撤退</button>
     <div class="enemy-area">
       <div class="enemy wood-bg" id="enemyIcon"></div>
@@ -182,50 +190,93 @@ button{border:0;border-radius:13px;padding:11px;font-size:16px;font-weight:900;b
 
 <script>
 if(location.search.includes("reset=1")){
-  localStorage.removeItem("puzzleStableSave");
+  localStorage.removeItem("puzzleStableSave2");
   location.href=location.pathname;
 }
 
 const ROWS=5,COLS=6,MOVE_TIME=5;
 const TYPES=["fire","water","wood","light","dark","heart"];
 const ICONS={fire:"火",water:"水",wood:"木",light:"光",dark:"闇",heart:"♡"};
-const JP={fire:"火",water:"水",wood:"木",light:"光",dark:"闇",heart:"回復"};
-const BG={fire:"fire-bg",water:"water-bg",wood:"wood-bg",light:"light-bg",dark:"dark-bg"};
+const JP={fire:"火",water:"水",wood:"木",light:"光",dark:"闇",heart:"回復",none:"無"};
+const BG={fire:"fire-bg",water:"water-bg",wood:"wood-bg",light:"light-bg",dark:"dark-bg",none:"none-bg"};
 const $=id=>document.getElementById(id);
 
-function char(no,name,rarity,attr,hp,atk,rcv){
-  return {no,name,rarity,attr,hp,atk,rcv,type:"battle",lv:1};
+function char(no,name,rarity,attr,hp,atk,rcv,skill="なし",ls="なし"){
+  return {no,name,rarity,attr,hp,atk,rcv,type:"battle",lv:1,skill,ls};
 }
 
 const baseChars=[
- char(1,"火の見習い",1,"fire",500,150,15),
+ char(1,"火の見習い",1,"fire",500,150,15,"なし","4コンボ以上で攻撃上昇、最大3倍"),
  char(2,"水の守り手",1,"water",1500,50,45),
  char(3,"木の兵士",1,"wood",1000,100,30),
  char(4,"闇の爪",1,"dark",750,180,0),
  char(5,"光の癒し手",1,"light",1200,100,50),
- char(6,"火の助っ人",1,"fire",600,130,25)
+ char(6,"火の助っ人",1,"fire",600,130,25,"なし","7コンボ以上で攻撃力5倍")
 ];
 
 const gachaChars=[
- char(19,"炎剣士",3,"fire",1100,320,60),
- char(20,"アクアメイジ",3,"water",2100,180,220),
- char(21,"森忍者",3,"wood",1800,230,140),
- char(22,"聖騎士",3,"light",2000,250,210),
- char(23,"ダークシャーマン",3,"dark",1600,420,20),
- char(27,"戦神兵",4,"fire",1900,520,80),
- char(28,"癒し巫女",4,"water",2900,220,340),
- char(33,"冥騎士",4,"dark",2100,700,0),
- char(37,"フェニックス",5,"fire",2600,980,140),
- char(38,"三界龍",5,"wood",4200,620,220),
- char(39,"聖魔神",5,"dark",3000,1250,40),
- char(42,"創世龍",6,"light",5200,980,520),
- char(43,"炎海神",6,"fire",3300,1650,110),
- char(45,"終焉神ノクス",6,"dark",4100,2100,0),
+ char(19,"炎剣士",3,"fire",1100,320,60,"光→火変換","火属性の攻撃力1.5倍"),
+ char(20,"アクアメイジ",3,"water",2100,180,220,"闇→水変換","水属性のHP1.5倍"),
+ char(21,"森忍者",3,"wood",1800,230,140,"火→木変換","木属性の回復力1.5倍"),
+ char(22,"聖騎士",3,"light",2000,250,210,"水→光変換","光属性のHPと回復力1.2倍"),
+ char(23,"ダークシャーマン",3,"dark",1600,420,20,"木→闇変換","闇属性の攻撃力2倍"),
+ char(24,"火精霊",3,"fire",1200,300,90,"1ターン火属性攻撃1.5倍","火属性のHP1.2倍"),
+ char(25,"水精霊",3,"water",2400,170,260,"1ターン水属性回復1.5倍","水属性の回復力2倍"),
+
+ char(26,"時魔導士",4,"light",2500,320,260,"1ターン操作時間1秒延長","5コンボ以上で攻撃力上昇、最大5倍"),
+ char(27,"戦神兵",4,"fire",1900,520,80,"1ターン全属性攻撃1.5倍","火属性の攻撃力2倍"),
+ char(28,"癒し巫女",4,"water",2900,220,340,"1ターン全属性回復1.5倍","水属性のHPと回復力1.5倍"),
+ char(29,"火竜",4,"fire",1700,580,40,"火ドロップ3個生成","火属性の攻撃力2倍"),
+ char(30,"氷龍",4,"water",3200,260,260,"水ドロップ3個生成","水属性のHP2倍"),
+ char(31,"森龍",4,"wood",2800,310,190,"木ドロップ3個生成","木属性の攻撃と回復1.5倍"),
+ char(32,"雷帝",4,"light",2600,390,250,"右縦1列を光変換","光属性の攻撃力2倍"),
+ char(33,"冥騎士",4,"dark",2100,700,0,"左縦1列を闇変換","闇属性の攻撃力2.5倍"),
+ char(34,"森姫",4,"wood",3100,280,240,"中央横1列を木変換","木属性HP1.5倍、回復1.5倍"),
+ char(35,"爆炎王",4,"fire",1800,740,30,"上横1列を火変換","火属性攻撃3倍"),
+ char(36,"海王",4,"water",3500,240,300,"下横1列を水変換","水属性HP2倍、攻撃1.5倍"),
+
+ char(37,"フェニックス",5,"fire",2600,980,140,"1ターン25%軽減","火属性HP1.3倍、攻撃と回復1.5倍"),
+ char(38,"三界龍",5,"wood",4200,620,220,"全ドロップを火、水、木に変換","5コンボ以上で攻撃上昇、最大7倍、操作時間1秒延長"),
+ char(39,"聖魔神",5,"dark",3000,1250,40,"全ドロップを闇、光、回復に変換","闇/光同時消しで25%軽減、攻撃2.5倍、2コンボ加算"),
+ char(40,"光神騎士",5,"light",3900,760,330,"1ターン1コンボ加算、全属性攻撃1.3倍","光属性HP1.3倍、攻撃と回復1.5倍"),
+ char(41,"水巫女",5,"water",4700,510,520,"1ターン攻撃力と回復力1.2倍","水/木同時消しで15%軽減、攻撃4倍"),
+
+ char(42,"創世龍",6,"light",5200,980,520,"全ドロップを6色に変換","全属性HP1.5倍、攻撃と回復1.3倍、1コンボ加算"),
+ char(43,"炎海神",6,"fire",3300,1650,110,"全ドロップを火、水に変換","6コンボ以上で攻撃上昇、最大9倍、操作時間1.5秒延長"),
+ char(44,"深森神",6,"wood",5600,820,360,"全ドロップを水、木に変換","15%軽減、2コンボ加算、攻撃と回復1.2倍"),
+ char(45,"終焉神ノクス",6,"dark",4100,2100,0,"全ドロップを闇、光に変換","6コンボ以上で攻撃上昇、最大9倍、操作時間1.5秒延長"),
+ char(46,"天導姫",6,"light",4800,1100,620,"光ドロップ6個生成","全属性HP1.5倍、攻撃と回復1.3倍、1コンボ加算"),
+
  char(47,"火山ゴブリン",2,"fire",850,210,25),
+ char(48,"マグマスライム",2,"fire",950,180,35),
+ char(49,"炎狼",2,"fire",780,260,10),
  char(50,"アクアスライム",2,"water",1600,120,140),
+ char(51,"氷兵",2,"water",1750,110,160),
+ char(52,"深海ゴブリン",2,"water",1450,150,120),
  char(53,"森スライム",2,"wood",1500,160,90),
+ char(54,"リーフウルフ",2,"wood",1700,170,70),
+ char(55,"木霊兵",2,"wood",1800,150,80),
  char(56,"ライトフェアリー",2,"light",1650,180,140),
- char(59,"ダークスライム",2,"dark",1200,320,0)
+ char(57,"聖鳥",2,"light",1750,170,150),
+ char(58,"光騎兵",2,"light",1900,160,120),
+ char(59,"ダークスライム",2,"dark",1200,320,0),
+ char(60,"影狼",2,"dark",1350,360,0),
+ char(61,"闇兵士",2,"dark",1450,340,10)
+];
+
+const materialChars=[
+ {no:7,name:"火スキル素材",rarity:5,attr:"fire",type:"skill"},
+ {no:8,name:"水スキル素材",rarity:5,attr:"water",type:"skill"},
+ {no:9,name:"木スキル素材",rarity:5,attr:"wood",type:"skill"},
+ {no:10,name:"闇スキル素材",rarity:5,attr:"dark",type:"skill"},
+ {no:11,name:"光スキル素材",rarity:5,attr:"light",type:"skill"},
+ {no:12,name:"万能スキル素材",rarity:10,attr:"none",type:"skill"},
+ {no:13,name:"火覚醒素材",rarity:5,attr:"fire",type:"awake"},
+ {no:14,name:"水覚醒素材",rarity:5,attr:"water",type:"awake"},
+ {no:15,name:"木覚醒素材",rarity:5,attr:"wood",type:"awake"},
+ {no:16,name:"闇覚醒素材",rarity:5,attr:"dark",type:"awake"},
+ {no:17,name:"光覚醒素材",rarity:5,attr:"light",type:"awake"},
+ {no:18,name:"万能覚醒素材",rarity:10,attr:"none",type:"awake"}
 ];
 
 function freshSave(){
@@ -240,21 +291,13 @@ function freshSave(){
 
 let save;
 try{
-  save=JSON.parse(localStorage.getItem("puzzleStableSave")||"null")||freshSave();
+  save=JSON.parse(localStorage.getItem("puzzleStableSave2")||"null")||freshSave();
   if(!Array.isArray(save.owned)||!Array.isArray(save.partyNos))throw new Error("bad save");
-}catch(e){
-  save=freshSave();
-}
-function saveData(){localStorage.setItem("puzzleStableSave",JSON.stringify(save));}
+}catch(e){save=freshSave()}
+function saveData(){localStorage.setItem("puzzleStableSave2",JSON.stringify(save))}
 
-let selectedSlot=0;
-let party=[];
-let board=[];
-let dragging=false,movedOnce=false,resolving=false,selected=null,timerId=null,dragGhost=null;
-let playerMaxHp=0,playerHp=0,totalRcv=0;
-let enemyHp=0,enemyMaxHp=0,enemyAtk=0,floorIndex=0;
-let floors=[];
-
+let selectedSlot=0,party=[],board=[],dragging=false,movedOnce=false,resolving=false,selected=null,timerId=null,dragGhost=null;
+let playerMaxHp=0,playerHp=0,totalRcv=0,enemyHp=0,enemyMaxHp=0,enemyAtk=0,floorIndex=0,floors=[],currentDungeon="normal",tempDrops=[],tempStone=0;
 const boardEl=$("board"),boardWrap=$("boardWrap"),partyEl=$("party"),message=$("message");
 
 function showScreen(id){
@@ -270,30 +313,56 @@ function updateHome(){
   $("homeStatus").innerHTML=`ゴールド：${save.money}<br>ガチャ石：${save.stone}<br>ノーマル到達：ダンジョン${save.clearedNormal+1}<br><small>動かない時はURL末尾に ?reset=1</small>`;
 }
 
-function stat(c,k){return Math.floor((c[k]||0)*(1+((c.lv||1)-1)*0.025));}
-function getBattleOwned(){return save.owned.filter(c=>c.type==="battle");}
-function getCharByNo(no){return getBattleOwned().find(c=>c.no===no)||baseChars.find(c=>c.no===no)||baseChars[0];}
+function stat(c,k){return Math.floor((c[k]||0)*(1+((c.lv||1)-1)*0.025))}
+function getBattleOwned(){return save.owned.filter(c=>c.type==="battle")}
+function getCharByNo(no){return getBattleOwned().find(c=>c.no===no)||baseChars.find(c=>c.no===no)||baseChars[0]}
+
+function sortedOwned(){
+  let arr=[...save.owned];
+  let s=$("sortSelect")?.value||"no";
+  const order={fire:1,water:2,wood:3,light:4,dark:5,none:6};
+  arr.sort((a,b)=>{
+    if(s==="rarity")return (b.rarity||0)-(a.rarity||0)||a.no-b.no;
+    if(s==="attr")return (order[a.attr]||9)-(order[b.attr]||9)||a.no-b.no;
+    if(s==="hp")return stat(b,"hp")-stat(a,"hp");
+    if(s==="atk")return stat(b,"atk")-stat(a,"atk");
+    if(s==="rcv")return stat(b,"rcv")-stat(a,"rcv");
+    if(s==="lv")return (b.lv||1)-(a.lv||1);
+    return a.no-b.no;
+  });
+  return arr;
+}
 
 function renderCharList(){
   const list=$("charList");list.innerHTML="";
-  save.owned.forEach(c=>{
+  sortedOwned().forEach(c=>{
     const row=document.createElement("div");
     row.className="char-row";
-    row.innerHTML=`<span>★${c.rarity} No.${c.no} ${c.name}<br>${JP[c.attr]} / Lv${c.lv||1}</span><span>×${c.count||1}</span>`;
+    const kind=c.type==="skill"?"スキル素材":c.type==="awake"?"覚醒素材":"戦闘";
+    row.innerHTML=`<span>★${c.rarity} No.${c.no} ${c.name}<br>${JP[c.attr]} / Lv${c.lv||1} / ${kind}</span><span>×${c.count||1}</span>`;
     row.onclick=()=>showCharDetail(c);
     list.appendChild(row);
   });
 }
 
-function showCharDetail(c){
-  modal(`No.${c.no} ${c.name}`,
-`レア度：${c.rarity}
+function showCharDetail(c,fromFormation=false){
+  let text=`レア度：${c.rarity}
 属性：${JP[c.attr]}
 Lv：${c.lv||1}/100
 HP：${stat(c,"hp")}
 攻撃：${stat(c,"atk")}
-回復：${stat(c,"rcv")}`,
-[{label:"閉じる"}]);
+回復：${stat(c,"rcv")}
+
+スキル：
+${c.skill||"なし"}
+
+リーダースキル：
+${c.ls||"なし"}`;
+  const buttons=[{label:"閉じる"}];
+  if(fromFormation&&c.type==="battle"){
+    buttons.unshift({label:"この枠に編成",fn:()=>{save.partyNos[selectedSlot]=c.no;saveData();renderFormation()}});
+  }
+  modal(`No.${c.no} ${c.name}`,text,buttons);
 }
 
 function renderFormation(){
@@ -305,20 +374,20 @@ function renderFormation(){
     d.className="member "+(i===0?"leader":i===5?"friend":"");
     if(i===selectedSlot)d.style.outline="3px solid #fff3ad";
     d.innerHTML=`<div class="role">${i===0?"L":i===5?"F":i+1}</div><div class="atk">攻 ${stat(c,"atk")}</div><div class="icon ${BG[c.attr]}">${JP[c.attr]}</div><div class="name">No.${c.no}</div>`;
-    d.onclick=()=>{selectedSlot=i;renderFormation();};
+    d.onclick=()=>{selectedSlot=i;renderFormation()};
     slots.appendChild(d);
   });
   getBattleOwned().forEach(c=>{
     const row=document.createElement("div");
     row.className="char-row";
-    row.innerHTML=`<span>★${c.rarity} No.${c.no} ${c.name}<br>${JP[c.attr]} / Lv${c.lv||1}</span><span>編成</span>`;
-    row.onclick=()=>{save.partyNos[selectedSlot]=c.no;saveData();renderFormation();};
+    row.innerHTML=`<span>★${c.rarity} No.${c.no} ${c.name}<br>${JP[c.attr]} / Lv${c.lv||1}</span><span>詳細</span>`;
+    row.onclick=()=>showCharDetail(c,true);
     list.appendChild(row);
   });
 }
 
 function renderParty(){
-  party=(save.partyNos||[1,2,3,4,5,6]).slice(0,6).map(no=>getCharByNo(no));
+  party=save.partyNos.slice(0,6).map(no=>getCharByNo(no));
   playerMaxHp=party.reduce((s,c)=>s+stat(c,"hp"),0);
   totalRcv=party.reduce((s,c)=>s+stat(c,"rcv"),0);
   partyEl.innerHTML="";
@@ -352,16 +421,41 @@ function doGacha(n){
   $("gachaResult").innerHTML=`<div class="gacha-grid">${got.map(c=>`<div class="gacha-card rare${c.rarity}"><div class="icon ${BG[c.attr]}">${JP[c.attr]}</div>★${c.rarity}<br>No.${c.no}<br>${c.name}</div>`).join("")}</div>`;
 }
 
-function startDungeon(){
+function makeMaterial(type){
+  const pool=materialChars.filter(c=>c.type===type);
+  const n=Math.random()*100;
+  if(n<5)return pool.find(c=>c.rarity===10);
+  return pool.filter(c=>c.rarity===5)[Math.floor(Math.random()*5)];
+}
+
+function startDungeon(type){
+  currentDungeon=type;
   renderParty();
-  floorIndex=0;
-  floors=[
-    {name:"モリスライム",attr:"wood",hp:5000,atk:850},
-    {name:"アクアゴブリン",attr:"water",hp:6500,atk:950},
-    {name:"ファイアドラゴン",attr:"fire",hp:8000,atk:1100},
-    {name:"ダークナイト",attr:"dark",hp:9500,atk:1300},
-    {name:"ライトゴーレム",attr:"light",hp:13000,atk:1600}
-  ];
+  floorIndex=0;tempDrops=[];tempStone=0;
+  const normalNo=save.clearedNormal+1;
+  if(type==="normal"){
+    floors=[
+      {name:"モリスライム",attr:"wood",hp:5000,atk:850},
+      {name:"アクアゴブリン",attr:"water",hp:6500,atk:950},
+      {name:"ファイアドラゴン",attr:"fire",hp:8000,atk:1100},
+      {name:"ダークナイト",attr:"dark",hp:9500,atk:1300},
+      {name:"ライトゴーレム",attr:"light",hp:13000,atk:1600}
+    ].map((e,i)=>({...e,hp:Math.floor(e.hp*(1+(normalNo-1)*0.08+i*0.05)),atk:Math.floor(e.atk*(1+(normalNo-1)*0.05+i*0.04))}));
+  }else if(type==="skill"||type==="awake"){
+    floors=Array.from({length:5},()=>{
+      const m=makeMaterial(type==="skill"?"skill":"awake");
+      const u=m.rarity===10;
+      return {name:m.name,attr:m.attr==="none"?"light":m.attr,hp:u?22000:9500,atk:u?2600:1400,drop:m};
+    });
+  }else{
+    floors=[
+      {name:"コンボ吸収スライム",attr:"dark",hp:10000,atk:1200},
+      {name:"軽減ゴーレム",attr:"light",hp:15000,atk:1500},
+      {name:"高火力ドラゴン",attr:"fire",hp:12000,atk:2300},
+      {name:"闇光吸収ナイト",attr:"dark",hp:18000,atk:1800},
+      {name:"特殊ボス",attr:"water",hp:26000,atk:2600}
+    ];
+  }
   playerHp=playerMaxHp;
   setEnemy();
   createBoard();
@@ -388,7 +482,7 @@ function updateHp(){
   $("playerHpBar").style.width=(playerHp/playerMaxHp*100)+"%";
 }
 
-function retreatDungeon(){showScreen("dungeonMenu");}
+function retreatDungeon(){showScreen("dungeonMenu")}
 
 function createBoard(){
   board=[];
@@ -418,8 +512,8 @@ function getCell(x,y){
   if(r<0||c<0||r>=ROWS||c>=COLS)return null;
   return{r,c};
 }
-function swap(a,b){const t=board[a.r][a.c];board[a.r][a.c]=board[b.r][b.c];board[b.r][b.c]=t;}
-function near(a,b){return Math.abs(a.r-b.r)+Math.abs(a.c-b.c)===1;}
+function swap(a,b){const t=board[a.r][a.c];board[a.r][a.c]=board[b.r][b.c];board[b.r][b.c]=t}
+function near(a,b){return Math.abs(a.r-b.r)+Math.abs(a.c-b.c)===1}
 
 function createGhost(type,x,y){
   removeGhost();
@@ -439,7 +533,7 @@ function moveGhost(x,y){
   dragGhost.style.left=(x-rect.left)+"px";
   dragGhost.style.top=(y-rect.top)+"px";
 }
-function removeGhost(){if(dragGhost){dragGhost.remove();dragGhost=null;}}
+function removeGhost(){if(dragGhost){dragGhost.remove();dragGhost=null}}
 
 function startTimer(){
   clearInterval(timerId);
@@ -468,7 +562,7 @@ function moveDrag(e){
   const cell=getCell(e.clientX,e.clientY);
   if(!cell||cell.r===selected.r&&cell.c===selected.c)return;
   if(!near(selected,cell))return;
-  if(!movedOnce){movedOnce=true;startTimer();message.textContent="操作中…";}
+  if(!movedOnce){movedOnce=true;startTimer();message.textContent="操作中…"}
   swap(selected,cell);selected=cell;renderBoard();
 }
 function endDrag(e){
@@ -484,14 +578,14 @@ function getMatches(){
     let count=1;
     for(let c=1;c<=COLS;c++){
       if(c<COLS&&board[r][c]===board[r][c-1])count++;
-      else{if(count>=3)for(let k=0;k<count;k++)mark[r+","+(c-1-k)]=true;count=1;}
+      else{if(count>=3)for(let k=0;k<count;k++)mark[r+","+(c-1-k)]=true;count=1}
     }
   }
   for(let c=0;c<COLS;c++){
     let count=1;
     for(let r=1;r<=ROWS;r++){
       if(r<ROWS&&board[r][c]===board[r-1][c])count++;
-      else{if(count>=3)for(let k=0;k<count;k++)mark[(r-1-k)+","+c]=true;count=1;}
+      else{if(count>=3)for(let k=0;k<count;k++)mark[(r-1-k)+","+c]=true;count=1}
     }
   }
   return mark;
@@ -511,7 +605,7 @@ async function resolveBoard(){
     const keys=Object.keys(m);
     if(!keys.length)break;
     combo++;showCombo(combo);
-    keys.forEach(k=>{const [r,c]=k.split(",").map(Number);board[r][c]=null;});
+    keys.forEach(k=>{const [r,c]=k.split(",").map(Number);board[r][c]=null});
     renderBoard();
     await sleep(250);
     dropOrbs();
@@ -522,7 +616,7 @@ async function resolveBoard(){
   else enemyAttack();
   resolving=false;
 }
-function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 function dropOrbs(){
   for(let c=0;c<COLS;c++){
     const remain=[];
@@ -540,16 +634,16 @@ function pop(target,text,cls){
 }
 function attack(combo){
   const atk=party.reduce((s,c)=>s+stat(c,"atk"),0);
-  const dmg=Math.floor(atk*(1+(combo-1)*0.25));
+  let leaderBonus=1;
+  if(combo>=4)leaderBonus*=1.5;
+  if(combo>=7)leaderBonus*=1.5;
+  const dmg=Math.floor(atk*(1+(combo-1)*0.25)*leaderBonus);
   enemyHp=Math.max(0,enemyHp-dmg);
   pop($("enemyIcon"),dmg,"damage");
   updateHp();
   message.textContent=combo+"コンボ！ "+dmg+"ダメージ！";
-  if(enemyHp<=0){
-    setTimeout(nextFloor,800);
-  }else{
-    enemyAttack();
-  }
+  if(enemyHp<=0)setTimeout(nextFloor,800);
+  else enemyAttack();
 }
 function enemyAttack(){
   playerHp=Math.max(0,playerHp-enemyAtk);
@@ -559,13 +653,18 @@ function enemyAttack(){
   else message.textContent+=" / 敵の攻撃！";
 }
 function nextFloor(){
+  const e=floors[floorIndex];
+  if(e.drop)tempDrops.push(e.drop);
+  if(Math.random()<0.35)tempStone++;
   if(floorIndex>=4){
-    const gold=1000+save.clearedNormal*150;
+    const gold=currentDungeon==="normal"?1000+save.clearedNormal*150:700;
+    const stone=20+tempStone;
     save.money+=gold;
-    save.stone+=20;
-    save.clearedNormal++;
+    save.stone+=stone;
+    tempDrops.forEach(addOwned);
+    if(currentDungeon==="normal")save.clearedNormal++;
     saveData();
-    $("resultSummary").innerHTML=`獲得ゴールド：+${gold}<br>獲得ガチャ石：+20`;
+    $("resultSummary").innerHTML=`獲得ゴールド：+${gold}<br>獲得ガチャ石：+${stone}<br>獲得キャラ：${tempDrops.length}体`;
     showScreen("result");
   }else{
     floorIndex++;
@@ -582,12 +681,12 @@ function modal(title,text,buttons){
   buttons.forEach(x=>{
     const btn=document.createElement("button");
     btn.textContent=x.label;
-    btn.onclick=()=>{closeModal();x.fn&&x.fn();};
+    btn.onclick=()=>{closeModal();x.fn&&x.fn()};
     b.appendChild(btn);
   });
   $("modal").classList.add("active");
 }
-function closeModal(){$("modal").classList.remove("active");}
+function closeModal(){$("modal").classList.remove("active")}
 
 boardEl.addEventListener("pointerdown",startDrag);
 window.addEventListener("pointermove",moveDrag);
