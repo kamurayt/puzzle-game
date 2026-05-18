@@ -12,9 +12,7 @@ body{display:flex;justify-content:center}
 .screen{display:none;height:100%;flex-direction:column;gap:7px}.screen.active{display:flex}
 .title{text-align:center;font-size:26px;font-weight:900;color:#fff3ad;margin:6px 0}
 button,select{border:0;border-radius:13px;padding:11px;font-size:16px;font-weight:900;background:#eef2ff;color:#111827}
-select{width:100%}
-.menu{display:flex;flex-direction:column;gap:9px}
-.row{display:flex;gap:6px}.row button{flex:1}
+select{width:100%}.menu{display:flex;flex-direction:column;gap:9px}.row{display:flex;gap:6px}.row button{flex:1}
 .card,.status{background:#111827;border-radius:14px;padding:9px}
 .status{background:#020617;font-size:12px;line-height:1.5;color:#cbd5e1}
 .list{overflow:auto;display:flex;flex-direction:column;gap:6px}
@@ -33,6 +31,7 @@ select{width:100%}
 .member .atk{font-size:9px;color:#fde68a;font-weight:900}
 .member .icon{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900}
 .member .name{font-size:8px}
+.icon-img{width:100%;aspect-ratio:1;border-radius:50%;object-fit:cover;display:block;background:#020617}
 .player{background:#111827;border-radius:11px;padding:6px;position:relative}
 .hp-text{display:flex;justify-content:space-between;font-size:12px;font-weight:900;margin-bottom:3px}
 .player-hp-bar{height:11px;background:#020617;border-radius:999px;overflow:hidden}
@@ -70,6 +69,7 @@ select{width:100%}
 .gacha-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
 .gacha-card{background:#1e293b;border-radius:9px;padding:6px;text-align:center;font-size:11px}
 .gacha-card .icon{width:100%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;margin-bottom:2px}
+.gacha-card .icon-img{margin-bottom:2px}
 .rare6{outline:2px solid #facc15}.rare5{outline:2px solid #c084fc}
 </style>
 </head>
@@ -350,6 +350,13 @@ let playerMaxHp=0,playerHp=0,totalRcv=0,enemyHp=0,enemyMaxHp=0,enemyAtk=0,floorI
 const boardEl=$("board"),boardWrap=$("boardWrap"),partyEl=$("party"),message=$("message");
 
 function attrSpan(attr){return `<span class="attr-${attr}">${JP[attr]}</span>`}
+function hasImage(no){return no===42}
+function charIcon(c){
+  if(hasImage(c.no)){
+    return `<img class="icon-img" src="${c.no}.png" onerror="this.outerHTML='<div class=&quot;icon ${BG[c.attr]}&quot;>${JP[c.attr]}</div>'">`;
+  }
+  return `<div class="icon ${BG[c.attr]}">${JP[c.attr]}</div>`;
+}
 
 function showScreen(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
@@ -497,7 +504,7 @@ function renderFormation(){
     const d=document.createElement("div");
     d.className="member "+(i===0?"leader":i===5?"friend":"");
     if(i===selectedSlot)d.style.outline="3px solid #fff3ad";
-    d.innerHTML=`<div class="role">${i===0?"L":i===5?"F":i+1}</div><div class="atk">攻 ${stat(c,"atk")}</div><div class="icon ${BG[c.attr]}">${JP[c.attr]}</div><div class="name">No.${c.no}</div>`;
+    d.innerHTML=`<div class="role">${i===0?"L":i===5?"F":i+1}</div><div class="atk">攻 ${stat(c,"atk")}</div>${charIcon(c)}<div class="name">No.${c.no}</div>`;
     d.onclick=()=>{selectedSlot=i;renderFormation()};
     slots.appendChild(d);
   });
@@ -519,7 +526,7 @@ function renderParty(){
   party.forEach((c,i)=>{
     const d=document.createElement("div");
     d.className="member "+(i===0?"leader":i===5?"friend":"");
-    d.innerHTML=`<div class="role">${i===0?"L":i===5?"F":""}</div><div class="atk">攻 ${stat(c,"atk")}</div><div class="icon ${BG[c.attr]}">${JP[c.attr]}</div><div class="name">No.${c.no}</div>`;
+    d.innerHTML=`<div class="role">${i===0?"L":i===5?"F":""}</div><div class="atk">攻 ${stat(c,"atk")}</div>${charIcon(c)}<div class="name">No.${c.no}</div>`;
     d.onclick=()=>battleSkillPopup(c);
     partyEl.appendChild(d);
   });
@@ -591,7 +598,7 @@ function doGacha(n){
     got.push(c);addOwned(c);
   }
   saveData();$("gachaStoneText").textContent=save.stone;updateHome();
-  $("gachaResult").innerHTML=`<div class="gacha-grid">${got.map(c=>`<div class="gacha-card rare${c.rarity}" onclick="showCharDetailByNo(${c.no})"><div class="icon ${BG[c.attr]}">${JP[c.attr]}</div>★${c.rarity}<br>No.${c.no}<br>${c.name}</div>`).join("")}</div>`;
+  $("gachaResult").innerHTML=`<div class="gacha-grid">${got.map(c=>`<div class="gacha-card rare${c.rarity}" onclick="showCharDetailByNo(${c.no})">${charIcon(c)}★${c.rarity}<br>No.${c.no}<br>${c.name}</div>`).join("")}</div>`;
 }
 
 function showCharDetailByNo(no){
