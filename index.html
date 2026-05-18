@@ -197,7 +197,7 @@ select{width:100%}.menu{display:flex;flex-direction:column;gap:9px}.row{display:
 
 <script>
 if(location.search.includes("reset=1")){
-  localStorage.removeItem("puzzleStableSave4");
+  localStorage.removeItem("puzzleStableSave3");
   location.href=location.pathname;
 }
 
@@ -314,11 +314,12 @@ function freshSave(){
 
 let save;
 try{
-  save=JSON.parse(localStorage.getItem("puzzleStableSave4")||"null")||freshSave();
+  save=JSON.parse(localStorage.getItem("puzzleStableSave3")||"null")||freshSave();
   if(!Array.isArray(save.owned)||!Array.isArray(save.partyNos))throw new Error("bad save");
 }catch(e){save=freshSave()}
-function saveData(){localStorage.setItem("puzzleStableSave4",JSON.stringify(save))}
-
+function saveData(){
+  localStorage.setItem("puzzleStableSave3",JSON.stringify(save))
+}
 let selectedSlot=0,party=[],board=[],dragging=false,movedOnce=false,resolving=false,selected=null,timerId=null,dragGhost=null,lastCell=null;
 let playerMaxHp=0,playerHp=0,totalRcv=0,enemyHp=0,enemyMaxHp=0,enemyAtk=0,floorIndex=0,floors=[],currentDungeon="normal",tempDrops=[],tempStone=0,activeBuffs=[];
 const boardEl=$("board"),boardWrap=$("boardWrap"),partyEl=$("party"),message=$("message");
