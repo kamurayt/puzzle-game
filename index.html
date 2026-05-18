@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>パズルRPG 安定版</title>
+<title>パズルRPG</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:#0f172a;color:#fff;font-family:sans-serif;touch-action:none}
@@ -12,7 +12,9 @@ body{display:flex;justify-content:center}
 .screen{display:none;height:100%;flex-direction:column;gap:7px}.screen.active{display:flex}
 .title{text-align:center;font-size:26px;font-weight:900;color:#fff3ad;margin:6px 0}
 button,select{border:0;border-radius:13px;padding:11px;font-size:16px;font-weight:900;background:#eef2ff;color:#111827}
-select{width:100%}.menu{display:flex;flex-direction:column;gap:9px}.row{display:flex;gap:6px}.row button{flex:1}
+select{width:100%}
+.menu{display:flex;flex-direction:column;gap:9px}
+.row{display:flex;gap:6px}.row button{flex:1}
 .card,.status{background:#111827;border-radius:14px;padding:9px}
 .status{background:#020617;font-size:12px;line-height:1.5;color:#cbd5e1}
 .list{overflow:auto;display:flex;flex-direction:column;gap:6px}
@@ -210,22 +212,23 @@ const $=id=>document.getElementById(id);
 const noSkill={name:"なし",desc:"スキルなし",kind:"none"};
 
 function char(no,name,rarity,attr,hp,atk,rcv,skill=noSkill,ls="なし"){
-  return {no,name,rarity,attr,hp,atk,rcv,type:"battle",lv:1,skill,ls};
+  return {no,name,rarity,attr,hp,atk,rcv,type:"battle",lv:1,skillLv:1,skill,ls};
 }
+
 const sk={
  convert:(name,from,to)=>({name,desc:`${JP[from]}を${JP[to]}ドロップに変換`,kind:"convert",from,to}),
  gen:(to,count)=>({name:`${JP[to]}${count}個生成`,desc:`ランダムで${JP[to]}ドロップを${count}個生成`,kind:"generate",to,count}),
  row:(row,to,name)=>({name,desc:`横1列を${JP[to]}ドロップに変換`,kind:"row",row,to}),
  col:(col,to,name)=>({name,desc:`縦1列を${JP[to]}ドロップに変換`,kind:"col",col,to}),
  board:(name,types)=>({name,desc:`全ドロップを${types.map(t=>JP[t]).join("、")}に変換`,kind:"board",types}),
- buffAtk:(m)=>({name:`攻撃${m}倍`,desc:`1ターン全属性の攻撃力${m}倍`,kind:"buffAtk",mult:m}),
- buffRcv:(m)=>({name:`回復${m}倍`,desc:`1ターン全属性の回復力${m}倍`,kind:"buffRcv",mult:m}),
+ buffAtk:m=>({name:`攻撃${m}倍`,desc:`1ターン全属性の攻撃力${m}倍`,kind:"buffAtk",mult:m}),
+ buffRcv:m=>({name:`回復${m}倍`,desc:`1ターン全属性の回復力${m}倍`,kind:"buffRcv",mult:m}),
  buffAttrAtk:(a,m)=>({name:`${JP[a]}攻撃${m}倍`,desc:`1ターン${JP[a]}属性の攻撃力${m}倍`,kind:"buffAttrAtk",attr:a,mult:m}),
  buffAttrRcv:(a,m)=>({name:`${JP[a]}回復${m}倍`,desc:`1ターン${JP[a]}属性の回復力${m}倍`,kind:"buffAttrRcv",attr:a,mult:m}),
- shield:(r)=>({name:`${Math.round(r*100)}%軽減`,desc:`1ターンダメージを${Math.round(r*100)}%軽減`,kind:"shield",rate:r}),
- move:(p)=>({name:`操作+${p}秒`,desc:`1ターン操作時間を${p}秒延長`,kind:"move",plus:p}),
+ shield:r=>({name:`${Math.round(r*100)}%軽減`,desc:`1ターンダメージを${Math.round(r*100)}%軽減`,kind:"shield",rate:r}),
+ move:p=>({name:`操作+${p}秒`,desc:`1ターン操作時間を${p}秒延長`,kind:"move",plus:p}),
  atkCombo:(m,a)=>({name:`攻撃${m}倍+${a}コンボ`,desc:`1ターン${a}コンボ加算、攻撃力${m}倍`,kind:"atkCombo",mult:m,add:a}),
- atkRcv:(m)=>({name:`攻撃回復${m}倍`,desc:`1ターン攻撃力と回復力${m}倍`,kind:"atkRcv",mult:m})
+ atkRcv:m=>({name:`攻撃回復${m}倍`,desc:`1ターン攻撃力と回復力${m}倍`,kind:"atkRcv",mult:m})
 };
 
 const baseChars=[
@@ -245,7 +248,6 @@ const gachaChars=[
  char(23,"ダークシャーマン",3,"dark",1600,420,20,sk.convert("木→闇変換","wood","dark"),"闇属性の攻撃力2倍"),
  char(24,"火精霊",3,"fire",1200,300,90,sk.buffAttrAtk("fire",1.5),"火属性のHP1.2倍"),
  char(25,"水精霊",3,"water",2400,170,260,sk.buffAttrRcv("water",1.5),"水属性の回復力2倍"),
-
  char(26,"時魔導士",4,"light",2500,320,260,sk.move(1),"5コンボ以上で攻撃力上昇、最大5倍"),
  char(27,"戦神兵",4,"fire",1900,520,80,sk.buffAtk(1.5),"火属性の攻撃力2倍"),
  char(28,"癒し巫女",4,"water",2900,220,340,sk.buffRcv(1.5),"水属性のHPと回復力1.5倍"),
@@ -257,19 +259,16 @@ const gachaChars=[
  char(34,"森姫",4,"wood",3100,280,240,sk.row(2,"wood","中央横木変換"),"木属性HP1.5倍、回復1.5倍"),
  char(35,"爆炎王",4,"fire",1800,740,30,sk.row(0,"fire","上横火変換"),"火属性攻撃3倍"),
  char(36,"海王",4,"water",3500,240,300,sk.row(4,"water","下横水変換"),"水属性HP2倍、攻撃1.5倍"),
-
  char(37,"フェニックス",5,"fire",2600,980,140,sk.shield(.25),"火属性HP1.3倍、攻撃と回復1.5倍"),
  char(38,"三界龍",5,"wood",4200,620,220,sk.board("三色陣",["fire","water","wood"]),"5コンボ以上で攻撃上昇、最大7倍、操作時間1秒延長"),
  char(39,"聖魔神",5,"dark",3000,1250,40,sk.board("聖魔陣",["dark","light","heart"]),"闇/光同時消しで25%軽減、攻撃2.5倍、2コンボ加算"),
  char(40,"光神騎士",5,"light",3900,760,330,sk.atkCombo(1.3,1),"光属性HP1.3倍、攻撃と回復1.5倍"),
  char(41,"水巫女",5,"water",4700,510,520,sk.atkRcv(1.2),"水/木同時消しで15%軽減、攻撃4倍"),
-
  char(42,"創世龍",6,"light",5200,980,520,sk.board("6色陣",["fire","water","wood","dark","light","heart"]),"全属性HP1.8倍、攻撃力3倍、回復力2倍、1コンボ加算"),
  char(43,"炎海神",6,"fire",3300,1650,110,sk.board("火水2色陣",["fire","water"]),"6コンボ以上で攻撃上昇、最大9倍、操作時間1.5秒延長"),
  char(44,"深森神",6,"wood",5600,820,360,sk.board("水木2色陣",["water","wood"]),"15%軽減、2コンボ加算、攻撃と回復1.2倍"),
  char(45,"終焉神ノクス",6,"dark",4100,2100,0,sk.board("闇光2色陣",["dark","light"]),"6コンボ以上で攻撃上昇、最大9倍、操作時間1.5秒延長"),
  char(46,"天導姫",6,"light",4800,1100,620,sk.gen("light",6),"全属性HP1.8倍、攻撃力3倍、回復力2倍、1コンボ加算"),
-
  char(47,"火山ゴブリン",2,"fire",850,210,25),
  char(48,"マグマスライム",2,"fire",950,180,35),
  char(49,"炎狼",2,"fire",780,260,10),
@@ -288,25 +287,25 @@ const gachaChars=[
 ];
 
 const materialChars=[
- {no:7,name:"火スキル素材",rarity:5,attr:"fire",type:"skill"},
- {no:8,name:"水スキル素材",rarity:5,attr:"water",type:"skill"},
- {no:9,name:"木スキル素材",rarity:5,attr:"wood",type:"skill"},
- {no:10,name:"闇スキル素材",rarity:5,attr:"dark",type:"skill"},
- {no:11,name:"光スキル素材",rarity:5,attr:"light",type:"skill"},
- {no:12,name:"万能スキル素材",rarity:10,attr:"none",type:"skill"},
- {no:13,name:"火覚醒素材",rarity:5,attr:"fire",type:"awake"},
- {no:14,name:"水覚醒素材",rarity:5,attr:"water",type:"awake"},
- {no:15,name:"木覚醒素材",rarity:5,attr:"wood",type:"awake"},
- {no:16,name:"闇覚醒素材",rarity:5,attr:"dark",type:"awake"},
- {no:17,name:"光覚醒素材",rarity:5,attr:"light",type:"awake"},
- {no:18,name:"万能覚醒素材",rarity:10,attr:"none",type:"awake"}
+ {no:7,name:"火スキル素材",rarity:5,attr:"fire",type:"skill",count:1,lv:1,skillLv:1},
+ {no:8,name:"水スキル素材",rarity:5,attr:"water",type:"skill",count:1,lv:1,skillLv:1},
+ {no:9,name:"木スキル素材",rarity:5,attr:"wood",type:"skill",count:1,lv:1,skillLv:1},
+ {no:10,name:"闇スキル素材",rarity:5,attr:"dark",type:"skill",count:1,lv:1,skillLv:1},
+ {no:11,name:"光スキル素材",rarity:5,attr:"light",type:"skill",count:1,lv:1,skillLv:1},
+ {no:12,name:"万能スキル素材",rarity:10,attr:"none",type:"skill",count:1,lv:1,skillLv:1},
+ {no:13,name:"火覚醒素材",rarity:5,attr:"fire",type:"awake",count:1,lv:1,skillLv:1},
+ {no:14,name:"水覚醒素材",rarity:5,attr:"water",type:"awake",count:1,lv:1,skillLv:1},
+ {no:15,name:"木覚醒素材",rarity:5,attr:"wood",type:"awake",count:1,lv:1,skillLv:1},
+ {no:16,name:"闇覚醒素材",rarity:5,attr:"dark",type:"awake",count:1,lv:1,skillLv:1},
+ {no:17,name:"光覚醒素材",rarity:5,attr:"light",type:"awake",count:1,lv:1,skillLv:1},
+ {no:18,name:"万能覚醒素材",rarity:10,attr:"none",type:"awake",count:1,lv:1,skillLv:1}
 ];
 
 function freshSave(){
   return {
     money:0,
     stone:200,
-    owned:baseChars.map(c=>({...c,count:1,lv:1})),
+    owned:baseChars.map(c=>({...c,count:1,lv:1,skillLv:1})),
     partyNos:[1,2,3,4,5,6],
     clearedNormal:0
   };
@@ -317,14 +316,41 @@ try{
   save=JSON.parse(localStorage.getItem("puzzleStableSave3")||"null")||freshSave();
   if(!Array.isArray(save.owned)||!Array.isArray(save.partyNos))throw new Error("bad save");
 }catch(e){save=freshSave()}
-function saveData(){
-  localStorage.setItem("puzzleStableSave3",JSON.stringify(save))
+
+function syncOwnedData(){
+  save.owned.forEach(c=>{
+    const master=[...baseChars,...gachaChars,...materialChars].find(m=>m.no===c.no);
+    if(master){
+      c.name=master.name;
+      c.rarity=master.rarity;
+      c.attr=master.attr;
+      c.type=master.type||"battle";
+      c.hp=master.hp??c.hp??1;
+      c.atk=master.atk??c.atk??1;
+      c.rcv=master.rcv??c.rcv??1;
+      c.skill=master.skill||c.skill||noSkill;
+      c.ls=master.ls||c.ls||"なし";
+    }
+    if(c.type==="battle"&&!c.skillLv)c.skillLv=1;
+    if(!c.lv)c.lv=1;
+    if(!c.count)c.count=1;
+    if(c.no===42||c.no===46)c.ls="全属性HP1.8倍、攻撃力3倍、回復力2倍、1コンボ加算";
+  });
 }
+syncOwnedData();
+
+function saveData(){
+  syncOwnedData();
+  localStorage.setItem("puzzleStableSave3",JSON.stringify(save));
+}
+saveData();
+
 let selectedSlot=0,party=[],board=[],dragging=false,movedOnce=false,resolving=false,selected=null,timerId=null,dragGhost=null,lastCell=null;
 let playerMaxHp=0,playerHp=0,totalRcv=0,enemyHp=0,enemyMaxHp=0,enemyAtk=0,floorIndex=0,floors=[],currentDungeon="normal",tempDrops=[],tempStone=0,activeBuffs=[];
 const boardEl=$("board"),boardWrap=$("boardWrap"),partyEl=$("party"),message=$("message");
 
 function attrSpan(attr){return `<span class="attr-${attr}">${JP[attr]}</span>`}
+
 function showScreen(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   $(id).classList.add("active");
@@ -357,6 +383,7 @@ function sortArray(arr,selectId){
   });
   return arr;
 }
+
 function sortedOwned(){return sortArray([...save.owned],"sortSelect")}
 
 function partyRole(no){
@@ -373,7 +400,7 @@ function renderCharList(){
     const row=document.createElement("div");
     row.className="char-row";
     const kind=c.type==="skill"?"スキル素材":c.type==="awake"?"覚醒素材":"戦闘";
-    row.innerHTML=`<span>★${c.rarity} No.${c.no} ${c.name}<br>${attrSpan(c.attr)} / Lv${c.lv||1} / ${kind}</span><span>×${c.count||1}</span>`;
+    row.innerHTML=`<span>★${c.rarity} No.${c.no} ${c.name}<br>${attrSpan(c.attr)} / Lv${c.lv||1} / SLv${c.skillLv||1} / ${kind}</span><span>×${c.count||1}</span>`;
     row.onclick=()=>showCharDetail(c);
     list.appendChild(row);
   });
@@ -387,16 +414,79 @@ HP：${stat(c,"hp")}
 攻撃：${stat(c,"atk")}
 回復：${stat(c,"rcv")}
 
+スキルLv：${c.skillLv||1}
 スキル：
 ${skillText(c)}
 
 リーダースキル：
 ${c.ls||"なし"}`;
+
   const buttons=[{label:"閉じる"}];
+
+  if(c.type==="battle"){
+    buttons.unshift(
+      {label:"Lv強化",fn:()=>levelUp(c)},
+      {label:"スキル強化",fn:()=>skillUp(c)}
+    );
+  }
+
   if(fromFormation&&c.type==="battle"){
     buttons.unshift({label:"この枠に編成",fn:()=>{save.partyNos[selectedSlot]=c.no;saveData();renderFormation()}});
   }
+
   modal(`No.${c.no} ${c.name}`,text,buttons);
+}
+
+function levelCost(c){
+  const lv=c.lv||1;
+  return Math.floor(300*Math.pow(lv,1.55));
+}
+
+function levelUp(c){
+  if(c.type!=="battle")return modal("強化不可","このキャラはLv強化できません",[{label:"OK"}]);
+  if((c.lv||1)>=100)return modal("最大Lv","すでにLv100です",[{label:"OK"}]);
+
+  const cost=levelCost(c);
+  if(save.money<cost)return modal("ゴールド不足",`必要ゴールド：${cost}`,[{label:"OK"}]);
+
+  save.money-=cost;
+  c.lv=(c.lv||1)+1;
+  saveData();
+  updateHome();
+  renderCharList();
+  renderFormation();
+
+  modal("Lv強化成功",`${c.name} が Lv${c.lv} になった！\n消費ゴールド：${cost}`,[{label:"OK"}]);
+}
+
+function skillUpCost(){return 5000}
+
+function findSkillMaterial(attr){
+  return save.owned.find(x=>x.type==="skill"&&(x.attr===attr||x.no===12)&&(x.count||1)>0);
+}
+
+function skillUp(c){
+  if(c.type!=="battle")return modal("強化不可","このキャラはスキル強化できません",[{label:"OK"}]);
+  if(!c.skill||c.skill.kind==="none")return modal("スキルなし","このキャラは強化できるスキルがありません",[{label:"OK"}]);
+  if((c.skillLv||1)>=10)return modal("最大スキルLv","すでにスキルLv10です",[{label:"OK"}]);
+
+  const cost=skillUpCost();
+  const mat=findSkillMaterial(c.attr);
+
+  if(!mat)return modal("素材不足",`${JP[c.attr]}スキル素材、または万能スキル素材が必要です`,[{label:"OK"}]);
+  if(save.money<cost)return modal("ゴールド不足",`必要ゴールド：${cost}`,[{label:"OK"}]);
+
+  save.money-=cost;
+  mat.count=(mat.count||1)-1;
+  if(mat.count<=0)save.owned=save.owned.filter(x=>x!==mat);
+  c.skillLv=(c.skillLv||1)+1;
+
+  saveData();
+  updateHome();
+  renderCharList();
+  renderFormation();
+
+  modal("スキル強化成功",`${c.name} のスキルLvが ${c.skillLv} になった！\n消費：${mat.name} ×1\n消費ゴールド：${cost}`,[{label:"OK"}]);
 }
 
 function renderFormation(){
@@ -415,7 +505,7 @@ function renderFormation(){
     const role=partyRole(c.no);
     const row=document.createElement("div");
     row.className="char-row "+(role?"in-party":"");
-    row.innerHTML=`<span>★${c.rarity} No.${c.no} ${c.name}<br>${attrSpan(c.attr)} / Lv${c.lv||1}${role?`<br>${role}`:""}</span><span>詳細</span>`;
+    row.innerHTML=`<span>★${c.rarity} No.${c.no} ${c.name}<br>${attrSpan(c.attr)} / Lv${c.lv||1} / SLv${c.skillLv||1}${role?`<br>${role}`:""}</span><span>詳細</span>`;
     row.onclick=()=>showCharDetail(c,true);
     list.appendChild(row);
   });
@@ -485,7 +575,7 @@ function useSkill(c){
 function addOwned(c){
   const f=save.owned.find(x=>x.no===c.no);
   if(f)f.count=(f.count||1)+1;
-  else save.owned.push({...c,count:1,lv:1});
+  else save.owned.push({...c,count:1,lv:1,skillLv:1});
 }
 
 function doGacha(n){
