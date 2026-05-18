@@ -17,6 +17,7 @@ select{width:100%}.menu{display:flex;flex-direction:column;gap:9px}.row{display:
 .status{background:#020617;font-size:12px;line-height:1.5;color:#cbd5e1}
 .list{overflow:auto;display:flex;flex-direction:column;gap:6px}
 .char-row,.drop-row{background:#1e293b;border-radius:10px;padding:8px;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.char-row.in-party{outline:2px solid #fff3ad;background:#293548}
 .enemy-area{display:flex;gap:7px;align-items:center}.enemy{width:50px;height:50px;border-radius:50%;position:relative;flex-shrink:0}
 .enemy-info{flex:1;font-size:11px;color:#cbd5e1;padding-right:54px}.enemy-name{font-size:17px;color:white;font-weight:900}
 .hp-wrap{height:11px;background:#020617;border-radius:999px;overflow:hidden;margin:3px 0}
@@ -55,6 +56,7 @@ select{width:100%}.menu{display:flex;flex-direction:column;gap:9px}.row{display:
 .dark,.dark-bg{background:radial-gradient(circle at 30% 30%,#f5d0fe,#9333ea)}
 .none,.none-bg{background:radial-gradient(circle at 30% 30%,#eee,#64748b)}
 .heart{background:radial-gradient(circle at 30% 30%,#ffe4f0,#ec4899)}
+.attr-fire{color:#ff8a8a;font-weight:900}.attr-water{color:#8ecbff;font-weight:900}.attr-wood{color:#8dff9c;font-weight:900}.attr-light{color:#fff083;font-weight:900}.attr-dark{color:#d8a0ff;font-weight:900}.attr-none{color:#ddd;font-weight:900}
 .result-box{background:#111827;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .result-title{text-align:center;font-size:26px;font-weight:900;color:#fff3ad}
 .result-item{background:#020617;border-radius:12px;padding:10px;font-size:15px;line-height:1.5}
@@ -116,6 +118,15 @@ select{width:100%}.menu{display:flex;flex-direction:column;gap:9px}.row{display:
   <button onclick="showScreen('charMenu')">戻る</button>
   <div class="status">左端がリーダー、右端がフレンド。上の枠を押してから下のキャラを選ぶ。</div>
   <div class="party" id="formationSlots"></div>
+  <select id="formationSortSelect" onchange="renderFormation()">
+    <option value="no">No順</option>
+    <option value="rarity">レア度順</option>
+    <option value="attr">属性順</option>
+    <option value="hp">HP順</option>
+    <option value="atk">攻撃順</option>
+    <option value="rcv">回復順</option>
+    <option value="lv">Lv順</option>
+  </select>
   <div class="list" id="formationList"></div>
 </section>
 
@@ -186,7 +197,7 @@ select{width:100%}.menu{display:flex;flex-direction:column;gap:9px}.row{display:
 
 <script>
 if(location.search.includes("reset=1")){
-  localStorage.removeItem("puzzleStableSave3");
+  localStorage.removeItem("puzzleStableSave4");
   location.href=location.pathname;
 }
 
@@ -253,11 +264,11 @@ const gachaChars=[
  char(40,"光神騎士",5,"light",3900,760,330,sk.atkCombo(1.3,1),"光属性HP1.3倍、攻撃と回復1.5倍"),
  char(41,"水巫女",5,"water",4700,510,520,sk.atkRcv(1.2),"水/木同時消しで15%軽減、攻撃4倍"),
 
- char(42,"創世龍",6,"light",5200,980,520,sk.board("6色陣",["fire","water","wood","dark","light","heart"]),"全属性HP1.5倍、攻撃と回復1.3倍、1コンボ加算"),
+ char(42,"創世龍",6,"light",5200,980,520,sk.board("6色陣",["fire","water","wood","dark","light","heart"]),"全属性HP1.8倍、攻撃力3倍、回復力2倍、1コンボ加算"),
  char(43,"炎海神",6,"fire",3300,1650,110,sk.board("火水2色陣",["fire","water"]),"6コンボ以上で攻撃上昇、最大9倍、操作時間1.5秒延長"),
  char(44,"深森神",6,"wood",5600,820,360,sk.board("水木2色陣",["water","wood"]),"15%軽減、2コンボ加算、攻撃と回復1.2倍"),
  char(45,"終焉神ノクス",6,"dark",4100,2100,0,sk.board("闇光2色陣",["dark","light"]),"6コンボ以上で攻撃上昇、最大9倍、操作時間1.5秒延長"),
- char(46,"天導姫",6,"light",4800,1100,620,sk.gen("light",6),"全属性HP1.5倍、攻撃と回復1.3倍、1コンボ加算"),
+ char(46,"天導姫",6,"light",4800,1100,620,sk.gen("light",6),"全属性HP1.8倍、攻撃力3倍、回復力2倍、1コンボ加算"),
 
  char(47,"火山ゴブリン",2,"fire",850,210,25),
  char(48,"マグマスライム",2,"fire",950,180,35),
@@ -303,15 +314,16 @@ function freshSave(){
 
 let save;
 try{
-  save=JSON.parse(localStorage.getItem("puzzleStableSave3")||"null")||freshSave();
+  save=JSON.parse(localStorage.getItem("puzzleStableSave4")||"null")||freshSave();
   if(!Array.isArray(save.owned)||!Array.isArray(save.partyNos))throw new Error("bad save");
 }catch(e){save=freshSave()}
-function saveData(){localStorage.setItem("puzzleStableSave3",JSON.stringify(save))}
+function saveData(){localStorage.setItem("puzzleStableSave4",JSON.stringify(save))}
 
-let selectedSlot=0,party=[],board=[],dragging=false,movedOnce=false,resolving=false,selected=null,timerId=null,dragGhost=null;
+let selectedSlot=0,party=[],board=[],dragging=false,movedOnce=false,resolving=false,selected=null,timerId=null,dragGhost=null,lastCell=null;
 let playerMaxHp=0,playerHp=0,totalRcv=0,enemyHp=0,enemyMaxHp=0,enemyAtk=0,floorIndex=0,floors=[],currentDungeon="normal",tempDrops=[],tempStone=0,activeBuffs=[];
 const boardEl=$("board"),boardWrap=$("boardWrap"),partyEl=$("party"),message=$("message");
 
+function attrSpan(attr){return `<span class="attr-${attr}">${JP[attr]}</span>`}
 function showScreen(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   $(id).classList.add("active");
@@ -328,12 +340,10 @@ function updateHome(){
 function stat(c,k){return Math.floor((c[k]||0)*(1+((c.lv||1)-1)*0.025))}
 function getBattleOwned(){return save.owned.filter(c=>c.type==="battle")}
 function getCharByNo(no){return getBattleOwned().find(c=>c.no===no)||baseChars.find(c=>c.no===no)||baseChars[0]}
-
 function skillText(c){return typeof c.skill==="object"?`${c.skill.name}\n${c.skill.desc}`:(c.skill||"なし")}
 
-function sortedOwned(){
-  let arr=[...save.owned];
-  let s=$("sortSelect")?.value||"no";
+function sortArray(arr,selectId){
+  let s=$(selectId)?.value||"no";
   const order={fire:1,water:2,wood:3,light:4,dark:5,none:6};
   arr.sort((a,b)=>{
     if(s==="rarity")return (b.rarity||0)-(a.rarity||0)||a.no-b.no;
@@ -346,6 +356,15 @@ function sortedOwned(){
   });
   return arr;
 }
+function sortedOwned(){return sortArray([...save.owned],"sortSelect")}
+
+function partyRole(no){
+  const idx=(save.partyNos||[]).findIndex(x=>x===no);
+  if(idx<0)return "";
+  if(idx===0)return "編成中：L";
+  if(idx===5)return "編成中：F";
+  return `編成中：${idx+1}番`;
+}
 
 function renderCharList(){
   const list=$("charList");list.innerHTML="";
@@ -353,7 +372,7 @@ function renderCharList(){
     const row=document.createElement("div");
     row.className="char-row";
     const kind=c.type==="skill"?"スキル素材":c.type==="awake"?"覚醒素材":"戦闘";
-    row.innerHTML=`<span>★${c.rarity} No.${c.no} ${c.name}<br>${JP[c.attr]} / Lv${c.lv||1} / ${kind}</span><span>×${c.count||1}</span>`;
+    row.innerHTML=`<span>★${c.rarity} No.${c.no} ${c.name}<br>${attrSpan(c.attr)} / Lv${c.lv||1} / ${kind}</span><span>×${c.count||1}</span>`;
     row.onclick=()=>showCharDetail(c);
     list.appendChild(row);
   });
@@ -391,10 +410,11 @@ function renderFormation(){
     d.onclick=()=>{selectedSlot=i;renderFormation()};
     slots.appendChild(d);
   });
-  getBattleOwned().forEach(c=>{
+  sortArray([...getBattleOwned()],"formationSortSelect").forEach(c=>{
+    const role=partyRole(c.no);
     const row=document.createElement("div");
-    row.className="char-row";
-    row.innerHTML=`<span>★${c.rarity} No.${c.no} ${c.name}<br>${JP[c.attr]} / Lv${c.lv||1}</span><span>詳細</span>`;
+    row.className="char-row "+(role?"in-party":"");
+    row.innerHTML=`<span>★${c.rarity} No.${c.no} ${c.name}<br>${attrSpan(c.attr)} / Lv${c.lv||1}${role?`<br>${role}`:""}</span><span>詳細</span>`;
     row.onclick=()=>showCharDetail(c,true);
     list.appendChild(row);
   });
@@ -421,14 +441,8 @@ function battleSkillPopup(c){
   ]);
 }
 
-function addBuff(b){
-  activeBuffs.push(b);
-  updateBuffText();
-}
-
-function updateBuffText(){
-  $("buffText").textContent=activeBuffs.length?activeBuffs.map(b=>b.label).join(" / "):"効果なし";
-}
+function addBuff(b){activeBuffs.push(b);updateBuffText()}
+function updateBuffText(){$("buffText").textContent=activeBuffs.length?activeBuffs.map(b=>b.label).join(" / "):"効果なし"}
 
 function useSkill(c){
   const s=c.skill;
@@ -486,7 +500,12 @@ function doGacha(n){
     got.push(c);addOwned(c);
   }
   saveData();$("gachaStoneText").textContent=save.stone;updateHome();
-  $("gachaResult").innerHTML=`<div class="gacha-grid">${got.map(c=>`<div class="gacha-card rare${c.rarity}"><div class="icon ${BG[c.attr]}">${JP[c.attr]}</div>★${c.rarity}<br>No.${c.no}<br>${c.name}</div>`).join("")}</div>`;
+  $("gachaResult").innerHTML=`<div class="gacha-grid">${got.map(c=>`<div class="gacha-card rare${c.rarity}" onclick="showCharDetailByNo(${c.no})"><div class="icon ${BG[c.attr]}">${JP[c.attr]}</div>★${c.rarity}<br>No.${c.no}<br>${c.name}</div>`).join("")}</div>`;
+}
+
+function showCharDetailByNo(no){
+  const c=gachaChars.find(x=>x.no===no)||save.owned.find(x=>x.no===no);
+  if(c)showCharDetail(c);
 }
 
 function showGachaInfo(){
@@ -631,24 +650,54 @@ function startDrag(e){
   if(resolving||enemyHp<=0||playerHp<=0)return;
   const cell=getCell(e.clientX,e.clientY);
   if(!cell)return;
-  dragging=true;movedOnce=false;selected=cell;
+  dragging=true;movedOnce=false;selected=cell;lastCell=cell;
   createGhost(board[cell.r][cell.c],e.clientX,e.clientY);
   renderBoard();
 }
+
+function moveStep(next){
+  if(!selected||!next)return false;
+  if(next.r<0||next.c<0||next.r>=ROWS||next.c>=COLS)return false;
+  if(!near(selected,next))return false;
+  if(!movedOnce){movedOnce=true;startTimer();message.textContent="操作中…"}
+  swap(selected,next);
+  selected=next;
+  return true;
+}
+
 function moveDrag(e){
   e.preventDefault();
   if(!dragging||!selected)return;
   moveGhost(e.clientX,e.clientY);
   const cell=getCell(e.clientX,e.clientY);
   if(!cell||cell.r===selected.r&&cell.c===selected.c)return;
-  if(!near(selected,cell))return;
-  if(!movedOnce){movedOnce=true;startTimer();message.textContent="操作中…"}
-  swap(selected,cell);selected=cell;renderBoard();
+
+  const dr=cell.r-selected.r;
+  const dc=cell.c-selected.c;
+  const sr=Math.sign(dr);
+  const sc=Math.sign(dc);
+  let changed=false;
+
+  if(Math.abs(dr)>0&&Math.abs(dc)>0){
+    if(Math.abs(dc)>=Math.abs(dr)){
+      if(sc)changed=moveStep({r:selected.r,c:selected.c+sc})||changed;
+      if(sr)changed=moveStep({r:selected.r+sr,c:selected.c})||changed;
+    }else{
+      if(sr)changed=moveStep({r:selected.r+sr,c:selected.c})||changed;
+      if(sc)changed=moveStep({r:selected.r,c:selected.c+sc})||changed;
+    }
+  }else{
+    if(sr)changed=moveStep({r:selected.r+sr,c:selected.c})||changed;
+    if(sc)changed=moveStep({r:selected.r,c:selected.c+sc})||changed;
+  }
+
+  if(changed)renderBoard();
 }
+
 function endDrag(e){
   if(e)e.preventDefault();
   if(!dragging)return;
-  dragging=false;selected=null;clearInterval(timerId);removeGhost();renderBoard();
+  dragging=false;selected=null;lastCell=null;clearInterval(timerId);removeGhost();renderBoard();
   if(movedOnce)resolveBoard();
 }
 
@@ -717,8 +766,15 @@ function pop(target,text,cls){
 function attack(combo){
   const atk=party.reduce((s,c)=>s+stat(c,"atk"),0);
   let leaderBonus=1;
-  if(combo>=4)leaderBonus*=1.5;
-  if(combo>=7)leaderBonus*=1.5;
+  const lsText=(party[0]?.ls||"")+" "+(party[5]?.ls||"");
+  if(lsText.includes("攻撃力3倍"))leaderBonus*=3;
+  if(lsText.includes("攻撃力5倍")&&combo>=7)leaderBonus*=5;
+  if(lsText.includes("最大9倍")&&combo>=6)leaderBonus*=9;
+  if(lsText.includes("最大7倍")&&combo>=5)leaderBonus*=7;
+  if(leaderBonus===1){
+    if(combo>=4)leaderBonus*=1.5;
+    if(combo>=7)leaderBonus*=1.5;
+  }
   let buff=1;
   activeBuffs.forEach(b=>{
     if(b.kind==="atk"||b.kind==="atkCombo"||b.kind==="atkRcv")buff*=b.mult;
