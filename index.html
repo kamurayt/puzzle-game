@@ -212,7 +212,13 @@ select{width:100%}
 </div>
 
 <script>
-if(location.search.includes("reset=1")){
+alert(
+  Object.keys(localStorage)
+    .filter(k=>k.includes("puzzle"))
+    .map(k=>k+" = "+localStorage.getItem(k)?.slice(0,80))
+    .join("\n\n")
+);
+  if(location.search.includes("reset=1")){
   localStorage.removeItem("puzzleStableSave3");
   location.href=location.pathname;
 }
